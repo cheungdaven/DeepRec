@@ -4,12 +4,13 @@ import tensorflow as tf
 from RatingPrediction.NNMF import NNMF
 from RatingPrediction.MF import MF
 from RatingPrediction.NRR import NRR
+from RatingPrediction.AutoRec import *
 
 from LoadData.load_data_rating import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')
-    parser.add_argument('--model', choices=['MF','NNMF','NRR', 'combined', 'unlimpair', 'nlinearpair','neurecplus'], default = 'NRR')
+    parser.add_argument('--model', choices=['MF','NNMF','NRR', 'I-AutoRec', 'U-AutoRec'], default = 'I-AutoRec')
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--num_factors', type=int, default=10)
     parser.add_argument('--display_step', type=int, default=1000)
@@ -28,27 +29,34 @@ if __name__ == '__main__':
     display_step = args.display_step
     batch_size = args.batch_size
 
-
-
-    train_data, test_data, n_user, n_item  = load_data( test_size=0.1, sep="\t")
+    train_data, test_data, n_user, n_item = load_data_rating(test_size=0.1, sep="\t")
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
-
 
     if args.model == "MF":
         with tf.Session(config=config) as sess:
             model = MF(sess, n_user, n_item)
             model.initialize()
-            model.fit(train_data, test_data)
+            model.execute(train_data, test_data)
     if args.model == "NNMF":
         with tf.Session(config=config) as sess:
             model = NNMF(sess, n_user, n_item, learning_rate=learning_rate)
             model.initialize()
-            model.fit(train_data, test_data)
+            model.execute(train_data, test_data)
     if args.model == "NRR":
         with tf.Session(config=config) as sess:
             model = NRR(sess, n_user, n_item)
             model.initialize()
-            model.fit(train_data, test_data)
+            model.execute(train_data, test_data)
             model.predict([1,2],[1,8])
+    if args.model == "I-AutoRec":
+        with tf.Session(config=config) as sess:
+            model = IAutoRec(sess, n_user, n_item)
+            model.initialize()
+            model.execute(train_data, test_data)
+    if args.model == "U-AutoRec":
+        with tf.Session(config=config) as sess:
+            model = UAutoRec(sess, n_user, n_item)
+            model.initialize()
+            model.execute(train_data, test_data)

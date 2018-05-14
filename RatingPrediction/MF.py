@@ -32,6 +32,7 @@ class MF():
         self.show_time = show_time
         self.T = T
         self.display_step = display_step
+        print("MF.")
 
 
     def initialize(self, num_factor = 30):
@@ -57,54 +58,57 @@ class MF():
 
 
 
+    def train(self, train_data):
+        self.num_training = len(self.rating)
+        total_batch = int(self.num_training / self.batch_size)
+        idxs = np.random.permutation(self.num_training)  # shuffled ordering
+        user_random = list(self.user[idxs])
+        item_random = list(self.item[idxs])
+        rating_random = list(self.rating[idxs])
+        # train
+        for i in range(total_batch):
+            start_time = time.time()
+            batch_user = user_random[i * self.batch_size:(i + 1) * self.batch_size]
+            batch_item = item_random[i * self.batch_size:(i + 1) * self.batch_size]
+            batch_rating = rating_random[i * self.batch_size:(i + 1) * self.batch_size]
 
-    def fit(self, train_data, test_data):
+            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.user_id: batch_user,
+                                                                            self.item_id: batch_item,
+                                                                            self.rating: batch_rating
+                                                                            })
+            if i % self.display_step == 0:
+                print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
+                if self.show_time:
+                    print("one iteration: %s seconds." % (time.time() - start_time))
+
+    def test(self, test_data):
+        error = 0
+        error_mae = 0
+        test_set = list(test_data.keys())
+        for (u, i) in test_set:
+            pred_rating_test = self.predict([u], [i])
+            error += (float(test_data.get((u, i))) - pred_rating_test) ** 2
+            error_mae += (np.abs(float(test_data.get((u, i))) - pred_rating_test))
+        print("RMSE:" + str(RMSE(error, len(test_set))) + "; MAE:" + str(MAE(error_mae, len(test_set))))
+
+    def execute(self, train_data, test_data):
 
         t = train_data.tocoo()
-        user = t.row.reshape(-1)
-        item = t.col.reshape(-1)
-        rating = t.data
-        self.pred_rating +=  np.mean(list(rating))
+        self.user = t.row.reshape(-1)
+        self.item = t.col.reshape(-1)
+        self.rating = t.data
+        self.pred_rating +=  np.mean(list(self.rating))
         self.loss = tf.reduce_sum( tf.square(self.rating  - self.pred_rating)) \
                     + self.reg_rate * ( tf.norm(self.B_I) +  tf.norm(self.B_U) + tf.norm(self.P) +  tf.norm(self.Q))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
         init = tf.global_variables_initializer()
-        self.num_training = len(rating)
-        total_batch = int(self.num_training / self.batch_size)
-
         self.sess.run(init)
 
         for epoch in range(self.epochs):
-            idxs = np.random.permutation(self.num_training)  # shuffled ordering
-            user_random = list(user[idxs])
-            item_random = list(item[idxs])
-            rating_random = list(rating[idxs])
-            # train
-            for i in range(total_batch):
-                start_time = time.time()
-                batch_user = user_random[i * self.batch_size:(i + 1) * self.batch_size]
-                batch_item = item_random[i * self.batch_size:(i + 1) * self.batch_size]
-                batch_rating = rating_random[i * self.batch_size:(i + 1) * self.batch_size]
-
-                _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.user_id: batch_user,
-                                                                                self.item_id: batch_item,
-                                                                                self.rating: batch_rating
-                                                                                })
-                if i % self.display_step == 0:
-                    print("Index: %04d; Epoch: %04d; cost= %.9f" % (i + 1, epoch, np.mean(loss)))
-                    if self.show_time:
-                        print("one iteration: %s seconds." % (time.time() - start_time))
-
+            print("Epoch: %04d;" % (epoch))
+            self.train(train_data)
             if (epoch) % self.T == 0:
-                error = 0
-                error_mae = 0
-                test_set = list(test_data.keys())
-                for (u, i) in test_set:
-                    pred_rating_test = self.predict([u], [i])
-                    error += (float(test_data.get((u, i))) - pred_rating_test) ** 2
-                    error_mae += (np.abs(float(test_data.get((u, i))) - pred_rating_test))
-                print("RMSE:" + str(RMSE(error, len(test_set))) + "; MAE:"+str(MAE(error_mae, len(test_set))) )
-
+                self.test(test_data)
 
     def save(self, path):
         saver = tf.train.Saver()
