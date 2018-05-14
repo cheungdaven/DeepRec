@@ -35,7 +35,7 @@ class MF():
         print("MF.")
 
 
-    def initialize(self, num_factor = 30):
+    def build_network(self, num_factor = 30):
 
 
         # model dependent arguments

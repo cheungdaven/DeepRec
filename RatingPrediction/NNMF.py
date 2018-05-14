@@ -35,7 +35,7 @@ class NNMF():
         print("NNMF.")
 
 
-    def initialize(self, num_factor_1 = 10, num_factor_2 = 50, hidden_dimension= 40):
+    def build_network(self, num_factor_1 = 10, num_factor_2 = 50, hidden_dimension= 40):
         print("num_factor_1=%d, num_factor_2=%d, hidden_dimension=%d" % (num_factor_1, num_factor_2, hidden_dimension))
 
         # model dependent arguments

@@ -35,7 +35,7 @@ class NRR():
         print("NRR.")
 
 
-    def initialize(self, num_factor_user = 30, num_factor_item = 30, d = 20, hidden_dimension= 40):
+    def build_network(self, num_factor_user = 30, num_factor_item = 30, d = 20, hidden_dimension= 40):
 
 
         # model dependent arguments

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Implementation of Item based AutoRec.
+"""Implementation of Item based AutoRec and user based AutoRec.
 Reference: Sedhain, Suvash, et al. "Autorec: Autoencoders meet collaborative filtering." Proceedings of the 24th International Conference on World Wide Web. ACM, 2015.
 """
 
@@ -35,7 +35,7 @@ class IAutoRec():
         print("IAutoRec.")
 
 
-    def initialize(self, hidden_neuron = 500):
+    def build_network(self, hidden_neuron = 500):
 
         self.rating_matrix = tf.placeholder(dtype=tf.float32, shape=[self.num_user, None])
         self.rating_matrix_mask = tf.placeholder(dtype=tf.float32, shape=[self.num_user, None])
@@ -47,7 +47,7 @@ class IAutoRec():
         b = tf.Variable(tf.random_normal([self.num_user], stddev=0.01))
         layer_1 = tf.sigmoid( tf.expand_dims(mu, 1) + tf.matmul(V, self.rating_matrix))
         self.layer_2 = tf.matmul(W, layer_1) + tf.expand_dims(b, 1)
-        self.loss = tf.reduce_mean(tf.square(tf.norm(tf.multiply((self.rating_matrix - self.layer_2), self.rating_matrix_mask)))) + self.reg_rate * (tf.norm(W) + tf.norm(V))
+        self.loss = tf.reduce_mean(tf.square(tf.norm(tf.multiply((self.rating_matrix - self.layer_2), self.rating_matrix_mask)))) + self.reg_rate * (tf.square(tf.norm(W)) + tf.square(tf.norm(V)))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
     def train(self, train_data):
@@ -127,7 +127,7 @@ class UAutoRec():
         print("UAutoRec.")
 
 
-    def initialize(self, hidden_neuron = 500):
+    def build_network(self, hidden_neuron = 500):
 
         self.rating_matrix = tf.placeholder(dtype=tf.float32, shape=[self.num_item, None])
         self.rating_matrix_mask = tf.placeholder(dtype=tf.float32, shape=[self.num_item, None])

@@ -34,29 +34,21 @@ if __name__ == '__main__':
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
 
-    if args.model == "MF":
-        with tf.Session(config=config) as sess:
+    with tf.Session(config=config) as sess:
+        model = None
+        # Model selection
+        if args.model == "MF":
             model = MF(sess, n_user, n_item)
-            model.initialize()
-            model.execute(train_data, test_data)
-    if args.model == "NNMF":
-        with tf.Session(config=config) as sess:
+        if args.model == "NNMF":
             model = NNMF(sess, n_user, n_item, learning_rate=learning_rate)
-            model.initialize()
-            model.execute(train_data, test_data)
-    if args.model == "NRR":
-        with tf.Session(config=config) as sess:
+        if args.model == "NRR":
             model = NRR(sess, n_user, n_item)
-            model.initialize()
-            model.execute(train_data, test_data)
-            model.predict([1,2],[1,8])
-    if args.model == "I-AutoRec":
-        with tf.Session(config=config) as sess:
+        if args.model == "I-AutoRec":
             model = IAutoRec(sess, n_user, n_item)
-            model.initialize()
-            model.execute(train_data, test_data)
-    if args.model == "U-AutoRec":
-        with tf.Session(config=config) as sess:
+        if args.model == "U-AutoRec":
             model = UAutoRec(sess, n_user, n_item)
-            model.initialize()
+
+        # build and execute the model
+        if model is not None:
+            model.build_network()
             model.execute(train_data, test_data)
