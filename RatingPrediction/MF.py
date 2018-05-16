@@ -41,7 +41,7 @@ class MF():
         # model dependent arguments
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
-        self.rating = tf.placeholder("float", [None], 'rating')
+        self.y = tf.placeholder("float", [None], 'rating')
 
         self.P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=0.01))
         self.Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=0.01))
@@ -74,7 +74,7 @@ class MF():
 
             _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.user_id: batch_user,
                                                                             self.item_id: batch_item,
-                                                                            self.rating: batch_rating
+                                                                            self.y: batch_rating
                                                                             })
             if i % self.display_step == 0:
                 print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
@@ -89,7 +89,7 @@ class MF():
             pred_rating_test = self.predict([u], [i])
             error += (float(test_data.get((u, i))) - pred_rating_test) ** 2
             error_mae += (np.abs(float(test_data.get((u, i))) - pred_rating_test))
-        print("RMSE:" + str(RMSE(error, len(test_set))) + "; MAE:" + str(MAE(error_mae, len(test_set))))
+        print("RMSE:" + str(RMSE(error, len(test_set))[0]) + "; MAE:" + str(MAE(error_mae, len(test_set))[0]))
 
     def execute(self, train_data, test_data):
 
@@ -98,8 +98,11 @@ class MF():
         self.item = t.col.reshape(-1)
         self.rating = t.data
         self.pred_rating +=  np.mean(list(self.rating))
-        self.loss = tf.reduce_sum( tf.square(self.rating  - self.pred_rating)) \
-                    + self.reg_rate * ( tf.norm(self.B_I) +  tf.norm(self.B_U) + tf.norm(self.P) +  tf.norm(self.Q))
+        self.loss = tf.reduce_sum( tf.square(self.y  - self.pred_rating)) \
+                    + self.reg_rate * (tf.nn.l2_loss(self.B_I) + tf.nn.l2_loss(self.B_U) +  tf.nn.l2_loss(self.P) +  tf.nn.l2_loss(self.Q) )
+        #tf.norm(self.B_I) +  tf.norm(self.B_U) + tf.norm(self.P) +  tf.norm(self.Q))
+        #tf.reduce_sum(tf.square(P))
+        #tf.reduce_sum(tf.multiply(P,P))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
         init = tf.global_variables_initializer()
         self.sess.run(init)

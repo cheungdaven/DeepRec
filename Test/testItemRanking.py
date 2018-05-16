@@ -1,16 +1,15 @@
 import argparse
 import tensorflow as tf
 
-from RatingPrediction.NNMF import NNMF
-from RatingPrediction.MF import MF
-from RatingPrediction.NRR import NRR
-from RatingPrediction.AutoRec import *
+from ItemRanking.CDAE import CDAE
+from ItemRanking.BPRMF import BPRMF
+from ItemRanking.CML import CML
 
-from LoadData.load_data_rating import *
+from LoadData.load_data_ranking import *
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='nnRec')
-    parser.add_argument('--model', choices=['MF','NNMF','NRR', 'I-AutoRec', 'U-AutoRec'], default = 'NNMF')
+    parser = argparse.ArgumentParser(description='DeepRec')
+    parser.add_argument('--model', choices=['CDAE','CML','NeuMF', 'GMF', 'MLP', 'BPRMF'], default = 'CDAE')
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--num_factors', type=int, default=10)
     parser.add_argument('--display_step', type=int, default=1000)
@@ -29,7 +28,7 @@ if __name__ == '__main__':
     display_step = args.display_step
     batch_size = args.batch_size
 
-    train_data, test_data, n_user, n_item = load_data_rating(test_size=0.1, sep="\t")
+    train_data, test_data, n_user, n_item = load_data_neg(test_size=0.2, sep="\t")
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -37,16 +36,13 @@ if __name__ == '__main__':
     with tf.Session(config=config) as sess:
         model = None
         # Model selection
-        if args.model == "MF":
-            model = MF(sess, n_user, n_item)
-        if args.model == "NNMF":
-            model = NNMF(sess, n_user, n_item, learning_rate=learning_rate)
-        if args.model == "NRR":
-            model = NRR(sess, n_user, n_item)
-        if args.model == "I-AutoRec":
-            model = IAutoRec(sess, n_user, n_item)
-        if args.model == "U-AutoRec":
-            model = UAutoRec(sess, n_user, n_item)
+        if args.model == "CDAE":
+            train_data, test_data, n_user, n_item = load_data_all(test_size=0.2, sep="\t")
+            model = CDAE(sess, n_user, n_item)
+        if args.model == "CML":
+            model = CML(sess, n_user, n_item)
+        if args.model == "BPRMF":
+            model = BPRMF(sess, n_user, n_item)
 
         # build and execute the model
         if model is not None:

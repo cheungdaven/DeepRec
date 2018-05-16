@@ -39,13 +39,15 @@ class IAutoRec():
 
         self.rating_matrix = tf.placeholder(dtype=tf.float32, shape=[self.num_user, None])
         self.rating_matrix_mask = tf.placeholder(dtype=tf.float32, shape=[self.num_user, None])
+        self.keep_rate_net = tf.placeholder(tf.float32)
+        self.keep_rate_input = tf.placeholder(tf.float32)
 
         V =  tf.Variable(tf.random_normal([hidden_neuron, self.num_user], stddev=0.01))
         W =  tf.Variable(tf.random_normal([self.num_user, hidden_neuron], stddev=0.01))
 
         mu = tf.Variable(tf.random_normal([hidden_neuron], stddev=0.01))
         b = tf.Variable(tf.random_normal([self.num_user], stddev=0.01))
-        layer_1 = tf.sigmoid( tf.expand_dims(mu, 1) + tf.matmul(V, self.rating_matrix))
+        layer_1 = tf.nn.dropout(tf.sigmoid( tf.expand_dims(mu, 1) + tf.matmul(V, self.rating_matrix)), self.keep_rate_net)
         self.layer_2 = tf.matmul(W, layer_1) + tf.expand_dims(b, 1)
         self.loss = tf.reduce_mean(tf.square(tf.norm(tf.multiply((self.rating_matrix - self.layer_2), self.rating_matrix_mask)))) + self.reg_rate * (tf.square(tf.norm(W)) + tf.square(tf.norm(V)))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
@@ -63,7 +65,8 @@ class IAutoRec():
                 batch_set_idx = idxs[i * self.batch_size: (i + 1) * self.batch_size]
 
             _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.rating_matrix: self.train_data[:, batch_set_idx],
-                                                                            self.rating_matrix_mask: self.train_data_mask[:, batch_set_idx]
+                                                                            self.rating_matrix_mask: self.train_data_mask[:, batch_set_idx],
+                                                                            self.keep_rate_net: 0.93
                                                                             })
             if i % self.display_step == 0:
                 if self.verbose:
@@ -72,8 +75,8 @@ class IAutoRec():
 
     def test(self, test_data):
         self.reconstruction = self.sess.run(self.layer_2,feed_dict={self.rating_matrix: self.train_data ,
-                                                                          self.rating_matrix_mask:
-                                                                            self.train_data_mask})
+                                                                    self.rating_matrix_mask:self.train_data_mask,
+                                                                    self.keep_rate_net: 1})
         error = 0
         error_mae = 0
         test_set = list(test_data.keys())
@@ -181,8 +184,6 @@ class UAutoRec():
         init = tf.global_variables_initializer()
         self.sess.run(init)
         for epoch in range(self.epochs):
-            if self.verbose:
-                print("Epoch: %04d;" % (epoch))
             self.train(train_data)
             if (epoch) % self.T == 0:
                 print("Epoch: %04d; " % (epoch), end='')
