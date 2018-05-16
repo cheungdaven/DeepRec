@@ -18,5 +18,5 @@ Thank you for your support!
 
 
 # Call for Contributions
-This project is now calling for contributions, everyone interested in deep learning based recommender models is welcome.
+This project is now calling for contributions, everyone interested in deep learning based recommender models is welcome. Please contact me via cheungshuai@outlook.com
 
