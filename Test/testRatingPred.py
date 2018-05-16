@@ -1,12 +1,12 @@
 import argparse
 import tensorflow as tf
 
-from RatingPrediction.NNMF import NNMF
-from RatingPrediction.MF import MF
-from RatingPrediction.NRR import NRR
-from RatingPrediction.AutoRec import *
+from Models.RatingPrediction.NNMF import NNMF
+from Models.RatingPrediction.MF import MF
+from Models.RatingPrediction.NRR import NRR
+from Models.RatingPrediction.AutoRec import *
 
-from LoadData.load_data_rating import *
+from Utils.LoadData.load_data_rating import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')

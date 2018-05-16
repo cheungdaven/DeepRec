@@ -1,11 +1,11 @@
 import argparse
 import tensorflow as tf
 
-from ItemRanking.CDAE import CDAE
-from ItemRanking.BPRMF import BPRMF
-from ItemRanking.CML import CML
+from Models.ItemRanking.CDAE import CDAE
+from Models.ItemRanking.BPRMF import BPRMF
+from Models.ItemRanking.CML import CML
 
-from LoadData.load_data_ranking import *
+from Utils.LoadData.load_data_ranking import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='DeepRec')
