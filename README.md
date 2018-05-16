@@ -12,7 +12,10 @@ In this repository, we implement many recent deep learning based recommender mod
 # Citation
 
 To acknowledge use of this open source package in publications, please cite the 
-following paper:
+following papers:
+
+* TBA
+* Zhang, Shuai, Lina Yao, and Aixin Sun. "Deep learning based recommender system: A survey and new perspectives." arXiv preprint arXiv:1707.07435 (2017).
 
 Thank you for your support!
 
