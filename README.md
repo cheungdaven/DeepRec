@@ -9,6 +9,17 @@ In this repository, we implement many recent deep learning based recommender mod
 * sklearn
 * pandas
 
+# Citation
+
+To acknowledge use of this open source package in publications, please cite the 
+following papers:
+
+* TBA
+* Zhang, Shuai, Lina Yao, and Aixin Sun. "Deep learning based recommender system: A survey and new perspectives." arXiv preprint arXiv:1707.07435 (2017).
+
+Thank you for your support!
+
+
 # Call for Contributions
-This project is now calling for contributions, everyone interested in deep learning based recommender models is welcome.
+This project is now calling for contributions, everyone interested in deep learning based recommender models is welcome. Please contact me via cheungshuai@outlook.com
 
