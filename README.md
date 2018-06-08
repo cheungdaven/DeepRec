@@ -9,6 +9,11 @@ In this repository, we implement many recent deep learning based recommender mod
 * sklearn
 * pandas
 
+# To do
+* Add more models
+* Different Evaluation Protocals
+* Code Refactor
+
 # Citation
 
 To acknowledge use of this open source package in publications, please cite the 
