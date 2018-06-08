@@ -21,7 +21,7 @@ __status__ = "Development"
 class NRR():
 
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.1, epoch = 5, batch_size = 256, show_time = False, T = 1, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.1, epoch = 50, batch_size = 256, show_time = False, T = 1, display_step= 1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -35,7 +35,7 @@ class NRR():
         print("NRR.")
 
 
-    def build_network(self, num_factor_user = 30, num_factor_item = 30, d = 20, hidden_dimension= 40):
+    def build_network(self, num_factor_user = 40, num_factor_item = 40, d = 50, hidden_dimension= 40):
 
 
         # model dependent arguments

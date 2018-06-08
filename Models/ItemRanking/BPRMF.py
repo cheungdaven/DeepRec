@@ -54,7 +54,7 @@ class BPRMF():
         self.pred_y_neg = tf.reduce_sum(tf.multiply(user_latent_factor, neg_item_latent_factor), 1)
 
 
-        self.loss = - tf.reduce_sum(tf.log(tf.sigmoid( self.pred_y - self.pred_y_neg))) + self.reg_rate * (tf.norm(self.P) + tf.norm(self.Q))
+        self.loss = - tf.reduce_sum(tf.log(tf.sigmoid( self.pred_y - self.pred_y_neg))) + self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 

@@ -21,7 +21,7 @@ __status__ = "Development"
 class MF():
 
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.1, epoch = 500, batch_size = 256, show_time = False, T = 1, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.01, epoch = 500, batch_size = 128, show_time = False, T =2, display_step= 1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -53,6 +53,7 @@ class MF():
         item_latent_factor = tf.nn.embedding_lookup(self.Q, self.item_id)
         user_bias = tf.nn.embedding_lookup(self.B_U, self.user_id)
         item_bias = tf.nn.embedding_lookup(self.B_I, self.item_id)
+
 
         self.pred_rating = tf.reduce_sum(tf.multiply(user_latent_factor, item_latent_factor), 1) + user_bias + item_bias
 

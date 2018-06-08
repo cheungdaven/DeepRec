@@ -3,10 +3,7 @@
 Evaluation Metrics for Top N Recommendation
 """
 
-import tensorflow as tf
-import time
 import numpy as np
-import scipy
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"

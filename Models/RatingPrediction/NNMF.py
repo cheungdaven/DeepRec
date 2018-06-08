@@ -21,7 +21,7 @@ __status__ = "Development"
 class NNMF():
 
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.1, epoch = 500, batch_size = 256, show_time = False, T = 1, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.01, epoch = 500, batch_size = 256, show_time = False, T = 1, display_step= 1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -35,7 +35,7 @@ class NNMF():
         print("NNMF.")
 
 
-    def build_network(self, num_factor_1 = 10, num_factor_2 = 50, hidden_dimension= 40):
+    def build_network(self, num_factor_1 = 100, num_factor_2 = 10, hidden_dimension= 50):
         print("num_factor_1=%d, num_factor_2=%d, hidden_dimension=%d" % (num_factor_1, num_factor_2, hidden_dimension))
 
         # model dependent arguments
@@ -65,7 +65,7 @@ class NNMF():
         #reg_losses = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
         self.loss = tf.reduce_sum( tf.square(self.y  - self.pred_rating)) \
                     + tf.losses.get_regularization_loss() + self.reg_rate * ( tf.norm(U) +  tf.norm(V) + tf.norm(P) +  tf.norm(Q))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+        self.optimizer = tf.train.RMSPropOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
 
     def train(self, train_data):
@@ -95,6 +95,7 @@ class NNMF():
         error = 0
         error_mae = 0
         test_set = list(test_data.keys())
+        #users, items = map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
         for (u, i) in test_set:
             pred_rating_test = self.predict([u], [i])
             error += (float(test_data.get((u, i))) - pred_rating_test) ** 2

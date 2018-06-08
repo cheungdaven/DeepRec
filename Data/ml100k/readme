@@ -1,0 +1,5 @@
+# Description for Movielens Dataset
+
+* movielens_100k.dat: The interaction history with explicit feedback
+* item_info.csv: item side information
+* user_info.csv: user side information

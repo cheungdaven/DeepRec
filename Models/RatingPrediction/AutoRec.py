@@ -66,7 +66,7 @@ class IAutoRec():
 
             _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.rating_matrix: self.train_data[:, batch_set_idx],
                                                                             self.rating_matrix_mask: self.train_data_mask[:, batch_set_idx],
-                                                                            self.keep_rate_net: 0.93
+                                                                            self.keep_rate_net: 0.95
                                                                             })
             if i % self.display_step == 0:
                 if self.verbose:
