@@ -14,6 +14,7 @@ In this repository, we implement many recent deep learning based recommender mod
 * CDAE (WSDM)
 * NeuMF (WWW)
 * CML (WWW)
+* etc.
 
 # To do
 * Add more models
