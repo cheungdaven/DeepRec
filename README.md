@@ -15,6 +15,7 @@ We implemented both rating estimation and top-n recommendation models.
 * NeuMF (WWW)
 * CML (WWW)
 * etc.
+
 You can run this code from Test/testItemRanking.py or Test/testRatingPred.py
 
 # Requirements
