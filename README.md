@@ -1,6 +1,10 @@
 # DeepRec
 In this repository, we implement many recent deep learning based recommender models with Tensorflow.
 
+# Call for Contributions
+Contributions and issues are always welcome. You can also contact me via email: cheungshuai@outlook.com
+
+
 # Requirements
 * Tensorflow 1.7+
 * Python 3.5+
@@ -31,6 +35,5 @@ following papers:
 Thank you for your support!
 
 
-# Call for Contributions
-This project is now calling for contributions, everyone interested in deep learning based recommender models is welcome. Please contact me via cheungshuai@outlook.com
+
 
