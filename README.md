@@ -13,7 +13,7 @@ In this repository, we implement many recent deep learning based recommender mod
 * AutoRec (www)
 * CDAE (WSDM)
 * NeuMF (WWW)
-× CML (WWW)
+* CML (WWW)
 
 # To do
 * Add more models
