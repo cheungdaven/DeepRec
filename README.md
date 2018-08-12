@@ -1,9 +1,20 @@
 # DeepRec
 In this repository, we implement many recent deep learning based recommender models with Tensorflow.
 
+
 # Call for Contributions
 Contributions and issues are always welcome. You can also contact me via email: cheungshuai@outlook.com
 
+
+
+
+# Implemented Algorithms
+We implemented both rating estimation and top-n recommendation models.
+* AutoRec (www)
+* CDAE (WSDM)
+* NeuMF (WWW)
+* CML (WWW)
+* etc.
 
 # Requirements
 * Tensorflow 1.7+
@@ -12,13 +23,6 @@ Contributions and issues are always welcome. You can also contact me via email: 
 * scipy
 * sklearn
 * pandas
-
-# Implemented Algorithms
-* AutoRec (www)
-* CDAE (WSDM)
-* NeuMF (WWW)
-* CML (WWW)
-* etc.
 
 # To do
 * Add more models
