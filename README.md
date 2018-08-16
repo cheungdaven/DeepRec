@@ -34,9 +34,9 @@ You can run this code from Test/testItemRanking.py or Test/testRatingPred.py
 # Citation
 
 To acknowledge use of this open source package in publications, please cite the 
-following papers:
+following paper:
 
-* Zhang, Shuai, Lina Yao, and Aixin Sun. "Deep learning based recommender system: A survey and new perspectives." arXiv preprint arXiv:1707.07435 (2017).
+* Shuai Zhang, Lina Yao, and Aixin Sun. "Deep learning based recommender system: A survey and new perspectives." arXiv preprint arXiv:1707.07435 (2017).
 
 Thank you for your support!
 
