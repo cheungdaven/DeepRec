@@ -2,9 +2,6 @@
 In this repository, we implement many recent deep learning based recommendation models with Tensorflow.
 
 
-# Call for Contributions
-Contributions and issues are always welcome. You can also contact me via email: cheungshuai@outlook.com
-
 
 
 
@@ -41,5 +38,6 @@ following paper:
 Thank you for your support!
 
 
+Contributions and issues are always welcome. You can also contact me via email: cheungshuai@outlook.com
 
 
