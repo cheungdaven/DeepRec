@@ -11,6 +11,7 @@ We implemented both rating estimation and top-n recommendation models.
 * NeuMF (WWW'17)
 * CML (WWW'17)
 * LRML (WWW'18) (DRAFT ONLY, testing will come soon)
+* NFM (SIGIR'17)
 * etc.
 
 You can run this code from Test/testItemRanking.py or Test/testRatingPred.py
