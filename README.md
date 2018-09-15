@@ -4,7 +4,6 @@ In this repository, we implement many recent deep learning based recommendation 
 
 
 
-
 # Implemented Algorithms
 We implemented both rating estimation and top-n recommendation models.
 * AutoRec (www'15)
