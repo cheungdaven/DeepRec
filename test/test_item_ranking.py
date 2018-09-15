@@ -12,7 +12,7 @@ from models.item_ranking.gmf import GMF
 from models.item_ranking.jrl import JRL
 from models.item_ranking.mlp import MLP
 
-from utils.LoadData.load_data_ranking import *
+from utils.load_data.load_data_ranking import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='DeepRec')

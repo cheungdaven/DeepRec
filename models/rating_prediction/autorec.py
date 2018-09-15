@@ -8,7 +8,7 @@ import time
 import numpy as np
 import scipy
 
-from utils.Evaluation.RatingMetrics import *
+from utils.evaluation.RatingMetrics import *
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"

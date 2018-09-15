@@ -9,7 +9,7 @@ from models.rating_prediction.mf import MF
 from models.rating_prediction.nrr import NRR
 from models.rating_prediction.autorec import *
 
-from utils.LoadData.load_data_rating import *
+from utils.load_data.load_data_rating import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')

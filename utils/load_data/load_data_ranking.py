@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 
 
-def load_data_all(path="B:/Datasets/MovieLens/ml-100k/u.data", header = ['user_id', 'item_id', 'rating', 'time'], test_size = 0.2, sep="\t"):
+def load_data_all(path="../data/ml100k/movielens_100k.dat", header = ['user_id', 'item_id', 'rating', 'time'], test_size = 0.2, sep="\t"):
 
     df = pd.read_csv(path, sep=sep, names=header, engine='python')
 
@@ -60,7 +60,7 @@ def load_data_all(path="B:/Datasets/MovieLens/ml-100k/u.data", header = ['user_i
 
     return train_interaction_matrix, test_dict, n_users, n_items
 
-def load_data_neg(path="B:/Datasets/MovieLens/ml-100k/u.data", header = ['user_id', 'item_id', 'rating', 'category'], test_size = 0.2, sep="\t"):
+def load_data_neg(path="../data/ml100k/movielens_100k.dat", header = ['user_id', 'item_id', 'rating', 'category'], test_size = 0.2, sep="\t"):
 
     df = pd.read_csv(path, sep=sep, names=header, engine='python')
 
