@@ -1,12 +1,15 @@
 import argparse
 import tensorflow as tf
+import sys
+import os.path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from Models.RatingPrediction.NNMF import NNMF
-from Models.RatingPrediction.MF import MF
-from Models.RatingPrediction.NRR import NRR
-from Models.RatingPrediction.AutoRec import *
+from models.rating_prediction.nnmf import NNMF
+from models.rating_prediction.mf import MF
+from models.rating_prediction.nrr import NRR
+from models.rating_prediction.autorec import *
 
-from Utils.LoadData.load_data_rating import *
+from utils.LoadData.load_data_rating import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')

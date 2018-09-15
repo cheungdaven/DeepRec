@@ -7,7 +7,7 @@ import tensorflow as tf
 import time
 import numpy as np
 
-from Utils.Evaluation.RatingMetrics import *
+from utils.Evaluation.RatingMetrics import *
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"

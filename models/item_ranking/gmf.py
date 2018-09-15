@@ -8,7 +8,7 @@ import time
 
 import random
 
-from Utils.Evaluation.RankingMetrics import *
+from utils.Evaluation.RankingMetrics import *
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"

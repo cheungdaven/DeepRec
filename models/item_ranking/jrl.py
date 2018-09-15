@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-"""Implementation of Neural Collaborative Filtering.
-Reference: He, Xiangnan, et al. "Neural collaborative filtering." Proceedings of the 26th International Conference on World Wide Web. International World Wide Web Conferences Steering Committee, 2017.
+"""Implementation of Joint Representation Learning .
+Reference: Zhang, Yongfeng, et al. "Joint representation learning for top-n recommendation with heterogeneous information sources." Proceedings of the 2017 ACM on Conference on Information and Knowledge Management. ACM, 2017.
 """
 
 import tensorflow as tf
 import time
-import numpy as np
+
 import random
 
-from Utils.Evaluation.RankingMetrics import *
+from utils.Evaluation.RankingMetrics import *
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"
@@ -20,8 +20,10 @@ __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
 
-class NeuMF():
-
+class JRL():
+    """
+    Here we do not use the side information.
+    """
 
     def __init__(self, sess, num_user, num_item, learning_rate = 0.5, reg_rate = 0.01, epoch = 500, batch_size = 256, verbose = False, T = 1, display_step= 1000):
         self.learning_rate = learning_rate
@@ -37,7 +39,7 @@ class NeuMF():
         print("NeuMF.")
 
 
-    def build_network(self, num_factor = 10, num_factor_mlp = 64, hidden_dimension = 10, num_neg_sample = 30):
+    def build_network(self, num_factor = 10, num_neg_sample = 20, hidden_dimension= 10):
         self.num_neg_sample = num_neg_sample
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
@@ -46,28 +48,25 @@ class NeuMF():
         self.P = tf.Variable(tf.random_normal([self.num_user, num_factor]), dtype=tf.float32)
         self.Q = tf.Variable(tf.random_normal([self.num_item, num_factor]), dtype=tf.float32)
 
-        self.mlp_P = tf.Variable(tf.random_normal([self.num_user, num_factor_mlp]), dtype=tf.float32)
-        self.mlp_Q = tf.Variable(tf.random_normal([self.num_item, num_factor_mlp]), dtype=tf.float32)
+
 
         user_latent_factor = tf.nn.embedding_lookup(self.P, self.user_id)
         item_latent_factor = tf.nn.embedding_lookup(self.Q, self.item_id)
-        mlp_user_latent_factor = tf.nn.embedding_lookup(self.mlp_P, self.user_id)
-        mlp_item_latent_factor = tf.nn.embedding_lookup(self.mlp_Q, self.item_id)
-
         GMF = tf.multiply(user_latent_factor, item_latent_factor)
 
-        layer_1 = tf.layers.dense(inputs= tf.concat([mlp_item_latent_factor, mlp_user_latent_factor], axis=1), units= num_factor_mlp * 2, kernel_initializer=tf.random_normal_initializer, activation= tf.nn.relu, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        layer_2 = tf.layers.dense(inputs= layer_1, units = hidden_dimension * 8, activation = tf.nn.relu, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        layer_3 = tf.layers.dense(inputs=layer_2, units = hidden_dimension * 4, activation=tf.nn.relu,   kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        layer_4 = tf.layers.dense(inputs=layer_3, units=hidden_dimension * 2, activation=tf.nn.relu, kernel_initializer=tf.random_normal_initializer,kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        MLP =  tf.layers.dense(inputs=layer_4, units = hidden_dimension, activation=tf.nn.relu, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
 
-        self.pred_y =  tf.nn.sigmoid(tf.reduce_sum(tf.concat([GMF, MLP], axis=1), 1))
+        layer_1 = tf.layers.dense(inputs= GMF, units= num_factor, kernel_initializer=tf.random_normal_initializer, activation= tf.sigmoid, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_2 = tf.layers.dense(inputs= layer_1, units = hidden_dimension , activation = tf.sigmoid, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_3 = tf.layers.dense(inputs=layer_2, units = hidden_dimension , activation=tf.sigmoid,   kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_4 = tf.layers.dense(inputs=layer_3, units= hidden_dimension, activation=tf.sigmoid, kernel_initializer=tf.random_normal_initializer,kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        output =  tf.layers.dense(inputs=layer_4, units = hidden_dimension, activation=tf.sigmoid, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
 
-        #self.pred_y = tf.layers.dense(inputs=tf.concat([GMF, MLP], axis=1), units=1, activation=tf.sigmoid, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+
+        self.pred_y =  tf.nn.sigmoid(tf.reduce_sum(output,1))
+
 
         self.loss = - tf.reduce_sum( self.y  * tf.log(self.pred_y + 1e-10) + (1 - self.y) * tf.log(1 - self.pred_y + 1e-10) )\
-                    + tf.losses.get_regularization_loss() + self.reg_rate * ( tf.nn.l2_loss(self.P) +  tf.nn.l2_loss(self.Q) + tf.nn.l2_loss(self.mlp_P) +  tf.nn.l2_loss(self.mlp_Q))
+                    + tf.losses.get_regularization_loss() + self.reg_rate * ( tf.nn.l2_loss(self.P) +  tf.nn.l2_loss(self.Q) )
 
         self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss)
 

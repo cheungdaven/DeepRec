@@ -1,15 +1,18 @@
 import argparse
 import tensorflow as tf
+import sys
+import os.path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from Models.ItemRanking.CDAE import ICDAE
-from Models.ItemRanking.BPRMF import BPRMF
-from Models.ItemRanking.CML import CML
-from Models.ItemRanking.NeuMF import NeuMF
-from Models.ItemRanking.GMF import GMF
-from Models.ItemRanking.JRL import JRL
-from Models.ItemRanking.MLP import MLP
+from models.item_ranking.cdae import ICDAE
+from models.item_ranking.bprmf import BPRMF
+from models.item_ranking.cml import CML
+from models.item_ranking.neumf import NeuMF
+from models.item_ranking.gmf import GMF
+from models.item_ranking.jrl import JRL
+from models.item_ranking.mlp import MLP
 
-from Utils.LoadData.load_data_ranking import *
+from utils.LoadData.load_data_ranking import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='DeepRec')
