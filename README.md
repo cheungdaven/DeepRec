@@ -7,10 +7,10 @@ In this repository, we implement many recent deep learning based recommendation 
 
 # Implemented Algorithms
 We implemented both rating estimation and top-n recommendation models.
-* AutoRec (www)
-* CDAE (WSDM)
-* NeuMF (WWW)
-* CML (WWW)
+* AutoRec (www'15)
+* CDAE (WSDM'16)
+* NeuMF (WWW'17)
+* CML (WWW'17)
 * LRML (WWW'18) (DRAFT ONLY, testing will come soon)
 * etc.
 
