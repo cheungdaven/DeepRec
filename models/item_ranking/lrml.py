@@ -18,23 +18,22 @@ __maintainer__ = "Yi Tay"
 __email__ = "ytay017@gmail.com"
 __status__ = "Development"
 
+
 class LRML():
     """ This is a reference implementation of the LRML model
     proposed in WWW'18.
-
     Note: This was mainly adapted for the DeepRec repository
     and is copied from the first author's
     private code repository. This has NOT undergone sanity checks.
     """
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.1,
-                    reg_rate = 0.1, epoch = 500, batch_size = 500,
-                    verbose = False, T = 5, display_step= 1000, mode=1,
-                    copy_relations=True, dist='L1', num_mem=10):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.1,
+                 reg_rate=0.1, epoch=500, batch_size=500,
+                 verbose=False, T=5, display_step=1000, mode=1,
+                 copy_relations=True, dist='L1', num_mem=10):
         """ This model takes after the CML structure implemented by Shuai.
         There are several new hyperparameters introduced which are explained
         as follows:
-
         Args:
             mode:`int`.1 or 2. varies the attention computation.
                     2 corresponds to the implementation in the paper.
@@ -59,22 +58,22 @@ class LRML():
         print("LRML.")
 
     def lram(a, b, dropout,
-            reuse=None, initializer=None, k=10):
+             reuse=None, initializer=None, k=10):
         """ Generates relation given user (a) and item(b)
         """
         with tf.variable_scope('lrml', reuse=reuse) as scope:
-            if(relation is None):
+            if (relation is None):
                 _dim = a.get_shape().as_list()[1]
                 key_matrix = tf.get_variable('key_matrix', [_dim, k],
-                                initializer=initializer)
-                memories = tf.get_variable('memory',[_dim, k],
-                                initializer=initializer)
+                                             initializer=initializer)
+                memories = tf.get_variable('memory', [_dim, k],
+                                           initializer=initializer)
                 user_item_key = a * b
                 key_attention = tf.matmul(user_item_key, key_matrix)
-                key_attention = tf.nn.softmax(key_attention) # bsz x k
-                if(self.mode==1):
+                key_attention = tf.nn.softmax(key_attention)  # bsz x k
+                if (self.mode == 1):
                     relation = tf.matmul(key_attention, memories)
-                elif(self.mode==2):
+                elif (self.mode == 2):
                     key_attention = tf.expand_dims(key_attention, 1)
                     relation = key_attention * memories
                     relation = tf.reduce_sum(relation, 2)
@@ -86,13 +85,13 @@ class LRML():
 
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
-        self.neg_item_id = tf.placeholder(dtype=tf.int32,  shape=[None], name='neg_item_id')
+        self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
         self.keep_rate = tf.placeholder(tf.float32)
 
         P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=init), dtype=tf.float32)
         Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=init), dtype=tf.float32)
 
-        user_embedding = tf.nn.embedding_lookup(P,self.user_id)
+        user_embedding = tf.nn.embedding_lookup(P, self.user_id)
         item_embedding = tf.nn.embedding_lookup(Q, self.item_id)
         neg_item_embedding = tf.nn.embedding_lookup(Q, self.neg_item_id)
 
@@ -100,21 +99,21 @@ class LRML():
                                     reuse=None,
                                     initializer=tf.random_normal_initializer(init),
                                     k=self.num_mem)
-        if(copy_relations==False):
+        if (copy_relations == False):
             selected_memory_neg = self.lram(user_embedding, neg_item_embedding,
-                                    reuse=True,
-                                    initializer=tf.random_normal_initializer(init),
-                                    k=self.num_mem)
+                                            reuse=True,
+                                            initializer=tf.random_normal_initializer(init),
+                                            k=self.num_mem)
         else:
             selected_memory_neg = selected_memory
 
         energy_pos = item_embedding - (user_embedding + selected_memory)
         energy_neg = item_embedding_neg - (user_embedding + selected_memory_neg)
 
-        if(dist=='L2'):
+        if (dist == 'L2'):
             pos_dist = tf.sqrt(tf.reduce_sum(tf.square(energy_pos), 1) + 1E-3)
             neg_dist = tf.sqrt(tf.reduce_sum(tf.square(energy_neg), 1) + 1E-3)
-        elif(dist=='L1'):
+        elif (dist == 'L1'):
             pos_dist = tf.reduce_sum(tf.abs(energy_pos), 1)
             neg_dist = tf.reduce_sum(tf.abs(energy_neg), 1)
 
@@ -166,10 +165,10 @@ class LRML():
             batch_item_neg = item_random_neg[i * self.batch_size:(i + 1) * self.batch_size]
 
             _, loss, _, _ = self.sess.run((self.optimizer, self.loss, self.clip_P, self.clip_Q),
-                                feed_dict={self.user_id: batch_user,
-                                            self.item_id: batch_item,
-                                            self.neg_item_id: batch_item_neg,
-                                            self.keep_rate: 0.98})
+                                          feed_dict={self.user_id: batch_user,
+                                                     self.item_id: batch_item,
+                                                     self.neg_item_id: batch_item_neg,
+                                                     self.keep_rate: 0.98})
 
             if i % self.display_step == 0:
                 if self.verbose:
@@ -198,17 +197,8 @@ class LRML():
 
     def predict(self, user_id, item_id):
         return -self.sess.run([self.pred_distance],
-                    feed_dict={self.user_id: user_id,
-                    self.item_id: item_id, self.keep_rate:1})[0]
-
-
-    def _get_neg_items(self, data):
-        all_items = set(np.arange(self.num_item))
-        neg_items = {}
-        for u in range(self.num_user):
-            neg_items[u] = list(all_items - set(data.getrow(u).nonzero()[1]))
-
-        return neg_items
+                              feed_dict={self.user_id: user_id,
+                                         self.item_id: item_id, self.keep_rate: 1})[0]
 
     def _get_neg_items(self, data):
         all_items = set(np.arange(self.num_item))

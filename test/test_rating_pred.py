@@ -2,6 +2,7 @@ import argparse
 import tensorflow as tf
 import sys
 import os.path
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from models.rating_prediction.nnmf import NNMF
@@ -11,15 +12,16 @@ from models.rating_prediction.autorec import *
 
 from utils.load_data.load_data_rating import *
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')
-    parser.add_argument('--model', choices=['MF','NNMF','NRR', 'I-AutoRec', 'U-AutoRec'], default = 'NNMF')
+    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec'], default='NNMF')
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--num_factors', type=int, default=10)
     parser.add_argument('--display_step', type=int, default=1000)
-    parser.add_argument('--batch_size', type=int, default=256 ) #128 for unlimpair
-    parser.add_argument('--learning_rate', type=float, default=1e-3) #1e-4 for unlimpair
-    parser.add_argument('--reg_rate', type=float, default=0.1) #0.01 for unlimpair
+    parser.add_argument('--batch_size', type=int, default=256)  # 128 for unlimpair
+    parser.add_argument('--learning_rate', type=float, default=1e-3)  # 1e-4 for unlimpair
+    parser.add_argument('--reg_rate', type=float, default=0.1)  # 0.01 for unlimpair
     return parser.parse_args()
 
 
@@ -32,9 +34,9 @@ if __name__ == '__main__':
     display_step = args.display_step
     batch_size = args.batch_size
 
-
-
-    train_data, test_data, n_user, n_item = load_data_rating(path="../Data/ml100k/movielens_100k.dat", header=['user_id', 'item_id', 'rating','t'], test_size=0.1, sep="\t")
+    train_data, test_data, n_user, n_item = load_data_rating(path="../Data/ml100k/movielens_100k.dat",
+                                                             header=['user_id', 'item_id', 'rating', 't'],
+                                                             test_size=0.1, sep="\t")
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True

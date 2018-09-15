@@ -18,9 +18,10 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
-class CDAE():
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.01, reg_rate = 0.01, epoch = 500, batch_size = 100, verbose = False, T = 1, display_step= 1000):
+class CDAE():
+    def __init__(self, sess, num_user, num_item, learning_rate=0.01, reg_rate=0.01, epoch=500, batch_size=100,
+                 verbose=False, T=1, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -33,28 +34,27 @@ class CDAE():
         self.display_step = display_step
         print("CDAE.")
 
-
-    def build_network(self, hidden_neuron = 500, corruption_level = 0):
+    def build_network(self, hidden_neuron=500, corruption_level=0):
         self.corrupted_rating_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_item])
         self.rating_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_item])
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None])
         self.corruption_level = corruption_level
 
-
-        W =  tf.Variable(tf.random_normal([self.num_item, hidden_neuron], stddev=0.01))
+        W = tf.Variable(tf.random_normal([self.num_item, hidden_neuron], stddev=0.01))
         W_prime = tf.Variable(tf.random_normal([hidden_neuron, self.num_item], stddev=0.01))
         V = tf.Variable(tf.random_normal([self.num_user, hidden_neuron], stddev=0.01))
 
         b = tf.Variable(tf.random_normal([hidden_neuron], stddev=0.01))
         b_prime = tf.Variable(tf.random_normal([self.num_item], stddev=0.01))
         print(np.shape(tf.matmul(self.corrupted_rating_matrix, W)))
-        print(np.shape( tf.nn.embedding_lookup(V, self.user_id)))
-        layer_1 = tf.sigmoid( tf.matmul(self.corrupted_rating_matrix, W) + tf.nn.embedding_lookup(V, self.user_id) + b)
-        self.layer_2 = tf.sigmoid( tf.matmul(layer_1, W_prime) + b_prime)
+        print(np.shape(tf.nn.embedding_lookup(V, self.user_id)))
+        layer_1 = tf.sigmoid(tf.matmul(self.corrupted_rating_matrix, W) + tf.nn.embedding_lookup(V, self.user_id) + b)
+        self.layer_2 = tf.sigmoid(tf.matmul(layer_1, W_prime) + b_prime)
 
-        self.loss = - tf.reduce_sum(self.rating_matrix * tf.log(self.layer_2) + (1 - self.rating_matrix) * tf.log( 1- self.layer_2))\
-                                      + self.reg_rate * (tf.nn.l2_loss(W) + tf.nn.l2_loss(W_prime)  + tf.nn.l2_loss(V) + tf.nn.l2_loss(b) + tf.nn.l2_loss(b_prime))
-
+        self.loss = - tf.reduce_sum(
+            self.rating_matrix * tf.log(self.layer_2) + (1 - self.rating_matrix) * tf.log(1 - self.layer_2)) \
+                    + self.reg_rate * (
+        tf.nn.l2_loss(W) + tf.nn.l2_loss(W_prime) + tf.nn.l2_loss(V) + tf.nn.l2_loss(b) + tf.nn.l2_loss(b_prime))
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
@@ -78,18 +78,20 @@ class CDAE():
             elif i < self.total_batch - 1:
                 batch_set_idx = idxs[i * self.batch_size: (i + 1) * self.batch_size]
 
-            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.corrupted_rating_matrix: self._get_corrupted_input(self.train_data[batch_set_idx, :], self.corruption_level),
-                                                                            self.rating_matrix: self.train_data[batch_set_idx, :],
-                                                                            self.user_id: batch_set_idx
-                                                                            })
+            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={
+                self.corrupted_rating_matrix: self._get_corrupted_input(self.train_data[batch_set_idx, :],
+                                                                        self.corruption_level),
+                self.rating_matrix: self.train_data[batch_set_idx, :],
+                self.user_id: batch_set_idx
+                })
             if self.verbose and i % self.display_step == 0:
                 print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
                 if self.verbose:
                     print("one iteration: %s seconds." % (time.time() - start_time))
 
     def test(self):
-        self.reconstruction = self.sess.run(self.layer_2,feed_dict={self.corrupted_rating_matrix: self.train_data,
-                                                                    self.user_id:range(self.num_user)})
+        self.reconstruction = self.sess.run(self.layer_2, feed_dict={self.corrupted_rating_matrix: self.train_data,
+                                                                     self.user_id: range(self.num_user)})
 
         evaluate(self)
 
@@ -117,14 +119,12 @@ class CDAE():
         neg_items = {}
         for u in range(self.num_user):
             neg_items[u] = [k for k, i in enumerate(data[u]) if data[u][k] == 0]
-            #print(neg_items[u])
+            # print(neg_items[u])
 
         return neg_items
 
     def _get_corrupted_input(self, input, corruption_level):
-        return np.random.binomial(n=1, p = 1 -corruption_level)* input
-
-
+        return np.random.binomial(n=1, p=1 - corruption_level) * input
 
 
 class ICDAE():
@@ -132,7 +132,8 @@ class ICDAE():
     Based on CDAE and I-AutoRec, I designed the following item based CDAE, it seems to perform better than CDAE slightly.
     '''
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.01, reg_rate = 0.01, epoch = 500, batch_size = 300, verbose = False, T = 2, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.01, reg_rate=0.01, epoch=500, batch_size=300,
+                 verbose=False, T=2, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -145,28 +146,27 @@ class ICDAE():
         self.display_step = display_step
         print("Item based CDAE.")
 
-
-    def build_network(self, hidden_neuron = 500, corruption_level = 0):
+    def build_network(self, hidden_neuron=500, corruption_level=0):
         self.corrupted_interact_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_user])
         self.interact_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_user])
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None])
         self.corruption_level = corruption_level
 
-
-        W =  tf.Variable(tf.random_normal([self.num_user, hidden_neuron], stddev=0.01))
+        W = tf.Variable(tf.random_normal([self.num_user, hidden_neuron], stddev=0.01))
         W_prime = tf.Variable(tf.random_normal([hidden_neuron, self.num_user], stddev=0.01))
         V = tf.Variable(tf.random_normal([self.num_item, hidden_neuron], stddev=0.01))
 
         b = tf.Variable(tf.random_normal([hidden_neuron], stddev=0.01))
         b_prime = tf.Variable(tf.random_normal([self.num_user], stddev=0.01))
-        #print(np.shape(tf.matmul(self.corrupted_interact_matrix, W)))
-        #print(np.shape( tf.nn.embedding_lookup(V, self.item_id)))
-        layer_1 = tf.sigmoid( tf.matmul(self.corrupted_interact_matrix, W) + b)
-        self.layer_2 = tf.sigmoid( tf.matmul(layer_1, W_prime) + b_prime)
+        # print(np.shape(tf.matmul(self.corrupted_interact_matrix, W)))
+        # print(np.shape( tf.nn.embedding_lookup(V, self.item_id)))
+        layer_1 = tf.sigmoid(tf.matmul(self.corrupted_interact_matrix, W) + b)
+        self.layer_2 = tf.sigmoid(tf.matmul(layer_1, W_prime) + b_prime)
 
-        self.loss = - tf.reduce_sum(self.interact_matrix * tf.log(self.layer_2) + (1 - self.interact_matrix) * tf.log( 1- self.layer_2))\
-                                      + self.reg_rate * (tf.nn.l2_loss(W) + tf.nn.l2_loss(W_prime)   + tf.nn.l2_loss(b) + tf.nn.l2_loss(b_prime))
-
+        self.loss = - tf.reduce_sum(
+            self.interact_matrix * tf.log(self.layer_2) + (1 - self.interact_matrix) * tf.log(1 - self.layer_2)) \
+                    + self.reg_rate * (
+        tf.nn.l2_loss(W) + tf.nn.l2_loss(W_prime) + tf.nn.l2_loss(b) + tf.nn.l2_loss(b_prime))
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
@@ -190,18 +190,20 @@ class ICDAE():
             elif i < self.total_batch - 1:
                 batch_set_idx = idxs[i * self.batch_size: (i + 1) * self.batch_size]
 
-            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={self.corrupted_interact_matrix: self._get_corrupted_input(self.train_data[batch_set_idx, :], self.corruption_level),
-                                                                            self.interact_matrix: self.train_data[batch_set_idx, :],
-                                                                            self.item_id: batch_set_idx
-                                                                            })
+            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={
+                self.corrupted_interact_matrix: self._get_corrupted_input(self.train_data[batch_set_idx, :],
+                                                                          self.corruption_level),
+                self.interact_matrix: self.train_data[batch_set_idx, :],
+                self.item_id: batch_set_idx
+                })
             if self.verbose and i % self.display_step == 0:
                 print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
                 if self.verbose:
                     print("one iteration: %s seconds." % (time.time() - start_time))
 
     def test(self):
-        self.reconstruction = self.sess.run(self.layer_2,feed_dict={self.corrupted_interact_matrix: self.train_data,
-                                                                    self.item_id:range(self.num_item)}).transpose()
+        self.reconstruction = self.sess.run(self.layer_2, feed_dict={self.corrupted_interact_matrix: self.train_data,
+                                                                     self.item_id: range(self.num_item)}).transpose()
 
         evaluate(self)
 
@@ -229,11 +231,9 @@ class ICDAE():
         neg_items = {}
         for u in range(self.num_user):
             neg_items[u] = [k for k, i in enumerate(data[u]) if data[u][k] == 0]
-            #print(neg_items[u])
+            # print(neg_items[u])
 
         return neg_items
 
     def _get_corrupted_input(self, input, corruption_level):
-        return np.random.binomial(n=1, p = 1 -corruption_level)* input
-
-
+        return np.random.binomial(n=1, p=1 - corruption_level) * input

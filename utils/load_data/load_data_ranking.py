@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 
 
-def load_data_all(path="../data/ml100k/movielens_100k.dat", header = ['user_id', 'item_id', 'rating', 'time'], test_size = 0.2, sep="\t"):
-
+def load_data_all(path="../data/ml100k/movielens_100k.dat", header=['user_id', 'item_id', 'rating', 'time'],
+                  test_size=0.2, sep="\t"):
     df = pd.read_csv(path, sep=sep, names=header, engine='python')
 
     n_users = df.user_id.unique().shape[0]
@@ -60,8 +60,9 @@ def load_data_all(path="../data/ml100k/movielens_100k.dat", header = ['user_id',
 
     return train_interaction_matrix, test_dict, n_users, n_items
 
-def load_data_neg(path="../data/ml100k/movielens_100k.dat", header = ['user_id', 'item_id', 'rating', 'category'], test_size = 0.2, sep="\t"):
 
+def load_data_neg(path="../data/ml100k/movielens_100k.dat", header=['user_id', 'item_id', 'rating', 'category'],
+                  test_size=0.2, sep="\t"):
     df = pd.read_csv(path, sep=sep, names=header, engine='python')
 
     n_users = df.user_id.unique().shape[0]
@@ -104,10 +105,11 @@ def load_data_neg(path="../data/ml100k/movielens_100k.dat", header = ['user_id',
     print("Load data finished. Number of users:", n_users, "Number of items:", n_items)
     return train_matrix.todok(), test_dict, n_users, n_items
 
+
 def load_data_separately(path_train=None, path_test=None, path_val=None, header=['user_id', 'item_id', 'rating'],
                          sep=" ", n_users=0, n_items=0):
-    n_users = n_users 
-    n_items = n_items  
+    n_users = n_users
+    n_items = n_items
     print("start")
     train_matrix = None
     if path_train is not None:
@@ -119,14 +121,14 @@ def load_data_separately(path_train=None, path_test=None, path_val=None, header=
         train_rating = []
 
         for line in train_data.itertuples():
-            u = line[1] #  - 1
-            i = line[2] #  - 1
+            u = line[1]  # - 1
+            i = line[2]  # - 1
             train_row.append(u)
             train_col.append(i)
             train_rating.append(1)
 
         train_matrix = csr_matrix((train_rating, (train_row, train_col)), shape=(n_users, n_items))
-        
+
     print("Load data finished. Number of users:", n_users, "Number of items:", n_items)
     test_dict = None
     if path_test is not None:

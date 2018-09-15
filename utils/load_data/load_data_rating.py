@@ -4,7 +4,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 
-def load_data_rating(path="B:/Datasets/MovieLens/ml-100k/u.data", header = ['user_id', 'item_id', 'rating', 'category'], test_size = 0.1, sep="\t"):
+
+def load_data_rating(path="../data/ml100k/movielens_100k.dat", header=['user_id', 'item_id', 'rating', 'category'],
+                     test_size=0.1, sep="\t"):
     '''
     Loading the data for rating prediction task
     :param path: the path of the dataset, datasets should be in the CSV format

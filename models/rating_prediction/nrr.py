@@ -18,10 +18,10 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
+
 class NRR():
-
-
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.1, epoch = 50, batch_size = 256, show_time = False, T = 1, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.001, reg_rate=0.1, epoch=50, batch_size=256,
+                 show_time=False, T=1, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -34,9 +34,7 @@ class NRR():
         self.display_step = display_step
         print("NRR.")
 
-
-    def build_network(self, num_factor_user = 40, num_factor_item = 40, d = 50, hidden_dimension= 40):
-
+    def build_network(self, num_factor_user=40, num_factor_item=40, d=50, hidden_dimension=40):
 
         # model dependent arguments
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
@@ -53,23 +51,35 @@ class NRR():
         W_User = tf.Variable(tf.random_normal([num_factor_user, d], stddev=0.01))
         W_Item = tf.Variable(tf.random_normal([num_factor_item, d], stddev=0.01))
 
-
         input = tf.matmul(user_latent_factor, W_User) + tf.matmul(item_latent_factor, W_Item) + b
 
-
-        layer_1 = tf.layers.dense(inputs=input, units= d, bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, activation= tf.sigmoid, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
-        layer_2 = tf.layers.dense(inputs= layer_1, units = hidden_dimension, activation = tf.sigmoid,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
-        layer_3 = tf.layers.dense(inputs=layer_2, units = hidden_dimension, activation=tf.sigmoid,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
-        layer_4 = tf.layers.dense(inputs=layer_3, units=hidden_dimension, activation=tf.sigmoid,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer,kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        output =  tf.layers.dense(inputs=layer_4, units = 1, activation=None,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
+        layer_1 = tf.layers.dense(inputs=input, units=d, bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer, activation=tf.sigmoid,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_2 = tf.layers.dense(inputs=layer_1, units=hidden_dimension, activation=tf.sigmoid,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_3 = tf.layers.dense(inputs=layer_2, units=hidden_dimension, activation=tf.sigmoid,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_4 = tf.layers.dense(inputs=layer_3, units=hidden_dimension, activation=tf.sigmoid,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        output = tf.layers.dense(inputs=layer_4, units=1, activation=None,
+                                 bias_initializer=tf.random_normal_initializer,
+                                 kernel_initializer=tf.random_normal_initializer,
+                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
         self.pred_rating = tf.reshape(output, [-1])
 
-        #print(np.shape(output))
+        # print(np.shape(output))
         reg_losses = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
-        self.loss = tf.reduce_sum( tf.square(self.y  - self.pred_rating)) \
-                    + tf.losses.get_regularization_loss() + self.reg_rate * ( tf.norm(U) +  tf.norm(V) + tf.norm(b) +  tf.norm(W_Item) +  tf.norm(W_User))
+        self.loss = tf.reduce_sum(tf.square(self.y - self.pred_rating)) \
+                    + tf.losses.get_regularization_loss() + self.reg_rate * (
+        tf.norm(U) + tf.norm(V) + tf.norm(b) + tf.norm(W_Item) + tf.norm(W_User))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
-
 
     def train(self, train_data):
         self.num_training = len(self.rating)
@@ -128,4 +138,3 @@ class NRR():
         if prt:
             print(score)
         return score
-

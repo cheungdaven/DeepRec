@@ -18,10 +18,10 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
+
 class CML():
-
-
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.1, reg_rate = 0.1, epoch = 500, batch_size = 500, verbose = False, T = 5, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.1, reg_rate=0.1, epoch=500, batch_size=500,
+                 verbose=False, T=5, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -34,24 +34,24 @@ class CML():
         self.display_step = display_step
         print("CML.")
 
-
-    def build_network(self, num_factor = 100, margin = 0.5, norm_clip_value=1):
+    def build_network(self, num_factor=100, margin=0.5, norm_clip_value=1):
 
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
-        self.neg_item_id = tf.placeholder(dtype=tf.int32,  shape=[None], name='neg_item_id')
+        self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
         self.keep_rate = tf.placeholder(tf.float32)
 
         P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=1 / (num_factor ** 0.5)), dtype=tf.float32)
         Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=1 / (num_factor ** 0.5)), dtype=tf.float32)
 
-        user_embedding = tf.nn.embedding_lookup(P,self.user_id)
+        user_embedding = tf.nn.embedding_lookup(P, self.user_id)
         item_embedding = tf.nn.embedding_lookup(Q, self.item_id)
         neg_item_embedding = tf.nn.embedding_lookup(Q, self.neg_item_id)
 
-        self.pred_distance = tf.reduce_sum(tf.nn.dropout(tf.squared_difference(user_embedding, item_embedding),self.keep_rate), 1)
-        self.pred_distance_neg = tf.reduce_sum(tf.nn.dropout(tf.squared_difference(user_embedding, neg_item_embedding),self.keep_rate), 1)
-
+        self.pred_distance = tf.reduce_sum(
+            tf.nn.dropout(tf.squared_difference(user_embedding, item_embedding), self.keep_rate), 1)
+        self.pred_distance_neg = tf.reduce_sum(
+            tf.nn.dropout(tf.squared_difference(user_embedding, neg_item_embedding), self.keep_rate), 1)
 
         self.loss = tf.reduce_sum(tf.maximum(self.pred_distance - self.pred_distance_neg + margin, 0))
 
@@ -97,10 +97,11 @@ class CML():
             batch_item = item_random[i * self.batch_size:(i + 1) * self.batch_size]
             batch_item_neg = item_random_neg[i * self.batch_size:(i + 1) * self.batch_size]
 
-            _, loss, _, _ = self.sess.run((self.optimizer, self.loss, self.clip_P, self.clip_Q), feed_dict={self.user_id: batch_user,
-                                                                                                            self.item_id: batch_item,
-                                                                                                            self.neg_item_id: batch_item_neg,
-                                                                                                            self.keep_rate: 0.98})
+            _, loss, _, _ = self.sess.run((self.optimizer, self.loss, self.clip_P, self.clip_Q),
+                                          feed_dict={self.user_id: batch_user,
+                                                     self.item_id: batch_item,
+                                                     self.neg_item_id: batch_item_neg,
+                                                     self.keep_rate: 0.98})
 
             if i % self.display_step == 0:
                 if self.verbose:
@@ -128,8 +129,8 @@ class CML():
         saver.save(self.sess, path)
 
     def predict(self, user_id, item_id):
-        return -self.sess.run([self.pred_distance], feed_dict={self.user_id: user_id, self.item_id: item_id, self.keep_rate:1})[0]
-
+        return -self.sess.run([self.pred_distance],
+                              feed_dict={self.user_id: user_id, self.item_id: item_id, self.keep_rate: 1})[0]
 
     def _get_neg_items(self, data):
         all_items = set(np.arange(self.num_item))
@@ -139,6 +140,7 @@ class CML():
 
         return neg_items
 
+
 class CMLwarp():
     """
     To appear.
@@ -146,7 +148,8 @@ class CMLwarp():
 
     """
 
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.1, reg_rate = 0.1, epoch = 500, batch_size = 500, verbose = False, T = 5, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.1, reg_rate=0.1, epoch=500, batch_size=500,
+                 verbose=False, T=5, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -159,23 +162,21 @@ class CMLwarp():
         self.display_step = display_step
         print("CML warp loss.")
 
-
-    def build_network(self, num_factor = 100, margin = 0.5, norm_clip_value=1):
+    def build_network(self, num_factor=100, margin=0.5, norm_clip_value=1):
 
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
-        self.neg_item_id = tf.placeholder(dtype=tf.int32,  shape=[None], name='neg_item_id')
+        self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
 
         P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=1 / (num_factor ** 0.5)))
         Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=1 / (num_factor ** 0.5)))
 
-        user_embedding = tf.nn.embedding_lookup(P,self.user_id)
+        user_embedding = tf.nn.embedding_lookup(P, self.user_id)
         item_embedding = tf.nn.embedding_lookup(Q, self.item_id)
         neg_item_embedding = tf.nn.embedding_lookup(Q, self.neg_item_id)
 
         self.pred_distance = tf.reduce_sum(tf.squared_difference(user_embedding, item_embedding), 1)
         self.pred_distance_neg = tf.reduce_sum(tf.squared_difference(user_embedding, neg_item_embedding), 1)
-
 
         self.loss = tf.reduce_sum(tf.maximum(self.pred_distance - self.pred_distance_neg + margin, 0))
 
@@ -220,9 +221,10 @@ class CMLwarp():
             batch_item = item_random[i * self.batch_size:(i + 1) * self.batch_size]
             batch_item_neg = item_random_neg[i * self.batch_size:(i + 1) * self.batch_size]
 
-            _, loss, _ , _ = self.sess.run((self.optimizer, self.loss, self.clip_P, self.clip_Q), feed_dict={self.user_id: batch_user,
-                                                                                                             self.item_id: batch_item,
-                                                                                                             self.neg_item_id: batch_item_neg})
+            _, loss, _, _ = self.sess.run((self.optimizer, self.loss, self.clip_P, self.clip_Q),
+                                          feed_dict={self.user_id: batch_user,
+                                                     self.item_id: batch_item,
+                                                     self.neg_item_id: batch_item_neg})
 
             if i % self.display_step == 0:
                 if self.verbose:
@@ -251,7 +253,6 @@ class CMLwarp():
 
     def predict(self, user_id, item_id):
         return - self.sess.run([self.pred_distance], feed_dict={self.user_id: user_id, self.item_id: item_id})[0]
-
 
     def _get_neg_items(self, data):
         all_items = set(np.arange(self.num_item))

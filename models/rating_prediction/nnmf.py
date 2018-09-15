@@ -18,10 +18,10 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
+
 class NNMF():
-
-
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.01, epoch = 500, batch_size = 256, show_time = False, T = 1, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.001, reg_rate=0.01, epoch=500, batch_size=256,
+                 show_time=False, T=1, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -34,8 +34,7 @@ class NNMF():
         self.display_step = display_step
         print("NNMF.")
 
-
-    def build_network(self, num_factor_1 = 100, num_factor_2 = 10, hidden_dimension= 50):
+    def build_network(self, num_factor_1=100, num_factor_2=10, hidden_dimension=50):
         print("num_factor_1=%d, num_factor_2=%d, hidden_dimension=%d" % (num_factor_1, num_factor_2, hidden_dimension))
 
         # model dependent arguments
@@ -51,22 +50,38 @@ class NNMF():
 
         input = tf.concat(values=[tf.nn.embedding_lookup(P, self.user_id),
                                   tf.nn.embedding_lookup(Q, self.item_id),
-                                  tf.multiply(tf.nn.embedding_lookup(U, self.user_id),tf.nn.embedding_lookup(V, self.item_id))
+                                  tf.multiply(tf.nn.embedding_lookup(U, self.user_id),
+                                              tf.nn.embedding_lookup(V, self.item_id))
                                   ], axis=1)
 
-        layer_1 = tf.layers.dense(inputs=input, units= 2 * num_factor_1 + num_factor_2, bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, activation= tf.sigmoid, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
-        layer_2 = tf.layers.dense(inputs= layer_1, units = hidden_dimension, activation = tf.sigmoid,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
-        layer_3 = tf.layers.dense(inputs=layer_2, units = hidden_dimension, activation=tf.sigmoid,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
-        layer_4 = tf.layers.dense(inputs=layer_3, units=hidden_dimension, activation=tf.sigmoid,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer,kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        output =  tf.layers.dense(inputs=layer_4, units = 1, activation=None,  bias_initializer=tf.random_normal_initializer, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate ))
+        layer_1 = tf.layers.dense(inputs=input, units=2 * num_factor_1 + num_factor_2,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer, activation=tf.sigmoid,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_2 = tf.layers.dense(inputs=layer_1, units=hidden_dimension, activation=tf.sigmoid,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_3 = tf.layers.dense(inputs=layer_2, units=hidden_dimension, activation=tf.sigmoid,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_4 = tf.layers.dense(inputs=layer_3, units=hidden_dimension, activation=tf.sigmoid,
+                                  bias_initializer=tf.random_normal_initializer,
+                                  kernel_initializer=tf.random_normal_initializer,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        output = tf.layers.dense(inputs=layer_4, units=1, activation=None,
+                                 bias_initializer=tf.random_normal_initializer,
+                                 kernel_initializer=tf.random_normal_initializer,
+                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
         self.pred_rating = tf.reshape(output, [-1])
 
-        #print(np.shape(output))
-        #reg_losses = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
-        self.loss = tf.reduce_sum( tf.square(self.y  - self.pred_rating)) \
-                    + tf.losses.get_regularization_loss() + self.reg_rate * ( tf.norm(U) +  tf.norm(V) + tf.norm(P) +  tf.norm(Q))
+        # print(np.shape(output))
+        # reg_losses = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+        self.loss = tf.reduce_sum(tf.square(self.y - self.pred_rating)) \
+                    + tf.losses.get_regularization_loss() + self.reg_rate * (
+        tf.norm(U) + tf.norm(V) + tf.norm(P) + tf.norm(Q))
         self.optimizer = tf.train.RMSPropOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
-
 
     def train(self, train_data):
         self.num_training = len(self.rating)
@@ -91,11 +106,11 @@ class NNMF():
                 if self.show_time:
                     print("one iteration: %s seconds." % (time.time() - start_time))
 
-    def test(self,test_data):
+    def test(self, test_data):
         error = 0
         error_mae = 0
         test_set = list(test_data.keys())
-        #users, items = map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
+        # users, items = map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
         for (u, i) in test_set:
             pred_rating_test = self.predict([u], [i])
             error += (float(test_data.get((u, i))) - pred_rating_test) ** 2
@@ -113,8 +128,7 @@ class NNMF():
             print("Epoch: %04d;" % (epoch))
             self.train(train_data)
             if (epoch) % self.T == 0:
-               self.test(test_data)
-
+                self.test(test_data)
 
     def save(self, path):
         saver = tf.train.Saver()
@@ -122,4 +136,3 @@ class NNMF():
 
     def predict(self, user_id, item_id):
         return self.sess.run([self.pred_rating], feed_dict={self.user_id: user_id, self.item_id: item_id})[0]
-

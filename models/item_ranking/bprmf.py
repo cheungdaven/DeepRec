@@ -18,10 +18,10 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
+
 class BPRMF():
-
-
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.1, epoch = 500, batch_size = 1024, verbose = False, T = 5, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.001, reg_rate=0.1, epoch=500, batch_size=1024,
+                 verbose=False, T=5, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -34,17 +34,15 @@ class BPRMF():
         self.display_step = display_step
         print("BPRMF.")
 
-
-    def build_network(self, num_factor = 30):
+    def build_network(self, num_factor=30):
 
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
-        self.neg_item_id = tf.placeholder(dtype=tf.int32,  shape=[None], name='neg_item_id')
+        self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
         self.y = tf.placeholder("float", [None], 'rating')
 
         self.P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=0.01))
         self.Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=0.01))
-
 
         user_latent_factor = tf.nn.embedding_lookup(self.P, self.user_id)
         item_latent_factor = tf.nn.embedding_lookup(self.Q, self.item_id)
@@ -53,8 +51,8 @@ class BPRMF():
         self.pred_y = tf.reduce_sum(tf.multiply(user_latent_factor, item_latent_factor), 1)
         self.pred_y_neg = tf.reduce_sum(tf.multiply(user_latent_factor, neg_item_latent_factor), 1)
 
-
-        self.loss = - tf.reduce_sum(tf.log(tf.sigmoid( self.pred_y - self.pred_y_neg))) + self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
+        self.loss = - tf.reduce_sum(tf.log(tf.sigmoid(self.pred_y - self.pred_y_neg))) + self.reg_rate * (
+        tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
@@ -96,8 +94,8 @@ class BPRMF():
             batch_item_neg = item_random_neg[i * self.batch_size:(i + 1) * self.batch_size]
 
             _, loss = self.sess.run((self.optimizer, self.loss), feed_dict={self.user_id: batch_user,
-                                                                         self.item_id: batch_item,
-                                                                         self.neg_item_id: batch_item_neg})
+                                                                            self.item_id: batch_item,
+                                                                            self.neg_item_id: batch_item_neg})
 
             if i % self.display_step == 0:
                 if self.verbose:
@@ -126,7 +124,6 @@ class BPRMF():
 
     def predict(self, user_id, item_id):
         return self.sess.run([self.pred_y], feed_dict={self.user_id: user_id, self.item_id: item_id})[0]
-
 
     def _get_neg_items(self, data):
         all_items = set(np.arange(self.num_item))

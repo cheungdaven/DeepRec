@@ -18,10 +18,10 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
+
 class MF():
-
-
-    def __init__(self, sess, num_user, num_item, learning_rate = 0.001, reg_rate = 0.01, epoch = 500, batch_size = 128, show_time = False, T =2, display_step= 1000):
+    def __init__(self, sess, num_user, num_item, learning_rate=0.001, reg_rate=0.01, epoch=500, batch_size=128,
+                 show_time=False, T=2, display_step=1000):
         self.learning_rate = learning_rate
         self.epochs = epoch
         self.batch_size = batch_size
@@ -34,9 +34,7 @@ class MF():
         self.display_step = display_step
         print("MF.")
 
-
-    def build_network(self, num_factor = 30):
-
+    def build_network(self, num_factor=30):
 
         # model dependent arguments
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
@@ -54,10 +52,7 @@ class MF():
         user_bias = tf.nn.embedding_lookup(self.B_U, self.user_id)
         item_bias = tf.nn.embedding_lookup(self.B_I, self.item_id)
 
-
         self.pred_rating = tf.reduce_sum(tf.multiply(user_latent_factor, item_latent_factor), 1) + user_bias + item_bias
-
-
 
     def train(self, train_data):
         self.num_training = len(self.rating)
@@ -98,12 +93,13 @@ class MF():
         self.user = t.row.reshape(-1)
         self.item = t.col.reshape(-1)
         self.rating = t.data
-        self.pred_rating +=  np.mean(list(self.rating))
-        self.loss = tf.reduce_sum( tf.square(self.y  - self.pred_rating)) \
-                    + self.reg_rate * (tf.nn.l2_loss(self.B_I) + tf.nn.l2_loss(self.B_U) +  tf.nn.l2_loss(self.P) +  tf.nn.l2_loss(self.Q) )
-        #tf.norm(self.B_I) +  tf.norm(self.B_U) + tf.norm(self.P) +  tf.norm(self.Q))
-        #tf.reduce_sum(tf.square(P))
-        #tf.reduce_sum(tf.multiply(P,P))
+        self.pred_rating += np.mean(list(self.rating))
+        self.loss = tf.reduce_sum(tf.square(self.y - self.pred_rating)) \
+                    + self.reg_rate * (
+        tf.nn.l2_loss(self.B_I) + tf.nn.l2_loss(self.B_U) + tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
+        # tf.norm(self.B_I) +  tf.norm(self.B_U) + tf.norm(self.P) +  tf.norm(self.Q))
+        # tf.reduce_sum(tf.square(P))
+        # tf.reduce_sum(tf.multiply(P,P))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
         init = tf.global_variables_initializer()
         self.sess.run(init)
@@ -120,4 +116,3 @@ class MF():
 
     def predict(self, user_id, item_id):
         return self.sess.run([self.pred_rating], feed_dict={self.user_id: user_id, self.item_id: item_id})[0]
-
