@@ -2,6 +2,8 @@
 In this repository, we implement many recent deep learning based recommendation models with Tensorflow.
 
 
+# Collaborators
+[Shuai Zhang](https://sites.google.com/view/shuaizhang/home), [Yi Tay](https://sites.google.com/view/yitay/home), [Bin Wu](https://github.com/wubin7019088)
 
 
 # Implemented Algorithms
