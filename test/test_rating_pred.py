@@ -9,13 +9,13 @@ from models.rating_prediction.nnmf import NNMF
 from models.rating_prediction.mf import MF
 from models.rating_prediction.nrr import NRR
 from models.rating_prediction.autorec import *
-
+from models.rating_prediction.nfm import NFM
 from utils.load_data.load_data_rating import *
-
+from utils.load_data.load_data_content import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')
-    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec'], default='NNMF')
+    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec', 'FM', 'NFM', 'AFM'], default='NFM')
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--num_factors', type=int, default=10)
     parser.add_argument('--display_step', type=int, default=1000)
@@ -54,7 +54,13 @@ if __name__ == '__main__':
             model = IAutoRec(sess, n_user, n_item)
         if args.model == "U-AutoRec":
             model = UAutoRec(sess, n_user, n_item)
-
+        if args.model == "NFM":
+            train_data, test_data, feature_M = load_data_fm()
+            n_user = 957
+            n_item = 4082
+            model = NFM(sess, n_user, n_item)
+            model.build_network(feature_M)
+            model.execute(train_data, test_data)
         # build and execute the model
         if model is not None:
             model.build_network()
