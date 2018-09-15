@@ -16,12 +16,7 @@ We implemented both rating estimation and top-n recommendation models.
 You can run this code from Test/testItemRanking.py or Test/testRatingPred.py
 
 # Requirements
-* Tensorflow 1.7+
-* Python 3.5+
-* numpy
-* scipy
-* sklearn
-* pandas
+* Tensorflow 1.7+, Python 3.5+, numpy, scipy, sklearn, pandas
 
 # To do
 * Add more models
