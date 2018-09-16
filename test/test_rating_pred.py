@@ -37,8 +37,7 @@ if __name__ == '__main__':
     train_data, test_data, n_user, n_item = load_data_rating(path="../Data/ml100k/movielens_100k.dat",
                                                              header=['user_id', 'item_id', 'rating', 't'],
                                                              test_size=0.1, sep="\t")
-    print(type(train_data))
-    print(np.shape(train_data))
+
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
