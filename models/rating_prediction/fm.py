@@ -9,7 +9,7 @@ import time
 from sklearn.metrics import mean_squared_error
 import math
 
-from Utils.Evaluation.RatingMetrics import *
+from utils.evaluation.RatingMetrics import *
 
 __author__ = "Shuai Zhang"
 __copyright__ = "Copyright 2018, The DeepRec Project"

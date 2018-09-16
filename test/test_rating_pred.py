@@ -15,7 +15,7 @@ from utils.load_data.load_data_content import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')
-    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec', 'FM', 'NFM', 'AFM'], default='NFM')
+    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec', 'FM', 'NFM', 'AFM'], default='U-AutoRec')
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--num_factors', type=int, default=10)
     parser.add_argument('--display_step', type=int, default=1000)
@@ -37,6 +37,8 @@ if __name__ == '__main__':
     train_data, test_data, n_user, n_item = load_data_rating(path="../Data/ml100k/movielens_100k.dat",
                                                              header=['user_id', 'item_id', 'rating', 't'],
                                                              test_size=0.1, sep="\t")
+    print(type(train_data))
+    print(np.shape(train_data))
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
