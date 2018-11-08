@@ -81,7 +81,7 @@ def load_data_neg(path="../data/ml100k/movielens_100k.dat", header=['user_id', '
         i = line[2] - 1
         train_row.append(u)
         train_col.append(i)
-        train_rating.append(line[3])
+        train_rating.append(1)
     train_matrix = csr_matrix((train_rating, (train_row, train_col)), shape=(n_users, n_items))
 
     # all_items = set(np.arange(n_items))
@@ -95,7 +95,7 @@ def load_data_neg(path="../data/ml100k/movielens_100k.dat", header=['user_id', '
     for line in test_data.itertuples():
         test_row.append(line[1] - 1)
         test_col.append(line[2] - 1)
-        test_rating.append(line[3])
+        test_rating.append(1)
     test_matrix = csr_matrix((test_rating, (test_row, test_col)), shape=(n_users, n_items))
 
     test_dict = {}
