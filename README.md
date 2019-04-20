@@ -2,7 +2,7 @@
 In this repository, we implement many recent deep learning based recommendation models with Tensorflow.
 
 # Implemented Algorithms
-We implemented both rating estimation and top-n recommendation models.
+We implemented both rating estimation, top-n recommendation models and sequence-aware recommendation models.
 * I-AutoRec and U-AutoRec (www'15)
 * CDAE (WSDM'16)
 * NeuMF (WWW'17)
