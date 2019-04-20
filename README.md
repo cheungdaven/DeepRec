@@ -1,11 +1,6 @@
 # DeepRec
 In this repository, we implement many recent deep learning based recommendation models with Tensorflow.
 
-
-# Collaborators
-[Shuai Zhang](https://sites.google.com/view/shuaizhang/home), [Yi Tay](https://sites.google.com/view/yitay/home), [Bin Wu](https://wubinzzu.github.io/)
-
-
 # Implemented Algorithms
 We implemented both rating estimation and top-n recommendation models.
 * I-AutoRec and U-AutoRec (www'15)
@@ -35,14 +30,20 @@ To acknowledge use of this open source package in publications, please cite the
 following paper:
 
 ```
-@article{zhang2017deeprec,
+@article{zhang2019deeprec,
   title={Deep learning based recommender system: A survey and new perspectives},
   author={Zhang, Shuai and Yao, Lina and Sun, Aixin and Tay, Yi},
-  journal={arXiv preprint arXiv:1707.07435},
-  year={2017}
+  journal={ACM Computing Surveys (CSUR)},
+  volume={52},
+  number={1},
+  pages={5},
+  year={2019},
+  publisher={ACM}
 }
 ```
 Thank you for your support!!!
 
-
 Contributions and issues are always welcome. You can also contact me via email: cheungshuai@outlook.com
+
+# Collaborators
+[Shuai Zhang](https://sites.google.com/view/shuaizhang/home), [Yi Tay](https://sites.google.com/view/yitay/home), [Bin Wu](https://wubinzzu.github.io/)
