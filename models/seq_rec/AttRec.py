@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Implementation of Caser.
-Reference: Personalized Top-N Sequential Recommendation via Convolutional Sequence Embedding, Jiaxi Tang and Ke Wang , WSDM '18.
+Reference: Next Item Recommendation with Self-Attentive Metric Learning, Shuai Zhang etc. , AAAI workshop'18.
 """
 
 import tensorflow as tf
