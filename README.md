@@ -13,8 +13,9 @@ We implemented both rating estimation and top-n recommendation models.
 * PRME (IJCAI 2015)
 * CASER (WSDM 2018)
 * AttRec (AAAI 2019 RecNLP)
+and so on.
 
-You can run this code from Test/testItemRanking.py or Test/testRatingPred.py
+You can run this code from Test/test_item_ranking.py, Test/test_rating_pred.py, or Test/testSeqRec.py
 
 # Requirements
 * Tensorflow 1.7+, Python 3.5+, numpy, scipy, sklearn, pandas
