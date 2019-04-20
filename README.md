@@ -15,7 +15,9 @@ We implemented both rating estimation and top-n recommendation models.
 * LRML (WWW'18) (DRAFT ONLY, testing will come soon)
 * NFM (SIGIR'17)
 * NNMF (arxiv)
-* etc.
+* PRME (IJCAI 2015)
+* CASER (WSDM 2018)
+* AttRec (AAAI 2019 RecNLP)
 
 You can run this code from Test/testItemRanking.py or Test/testRatingPred.py
 
@@ -40,7 +42,7 @@ following paper:
   year={2017}
 }
 ```
-Thank you for your support!！！
+Thank you for your support!!!
 
 
 Contributions and issues are always welcome. You can also contact me via email: cheungshuai@outlook.com
