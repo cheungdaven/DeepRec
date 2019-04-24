@@ -44,7 +44,7 @@ following papers:
 ```
 or 
 ```
- @inproceedings{han2018openke,
+ @inproceedings{shuai2019deeprec,
    title={DeepRec: An Open-source Toolkit for Deep Learning based Recommendation},
    author={Shuai Zhang, Yi Tay, Lina Yao, Bin Wu, Aixin Sun},
    booktitle={Preprint},
