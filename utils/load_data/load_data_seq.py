@@ -255,4 +255,49 @@ class DataSet():
 # if __name__ == '__main__':
 #
 
+def data_preprocess(path, path_save, sep="\t", header = ['user_id', 'item_id', 'rating', 'timestampe']):
 
+    #TODO: leave the recent one for test, seperately the data into two parts.
+    df = pd.read_csv(path, sep=sep, names=header, engine='python')
+    test_items = {}
+    n_users = df.user_id.unique().shape[0]  # 943  # 6040 #.user_id.unique().shape[0]
+    n_items = df.item_id.unique().shape[0]  # 1682 # 3952 ##df.item_id.unique().shape[0]
+    print("Number of users: %d; Number of items: %d;" % (n_users, n_items))
+    train_items = {}
+    user_set = set()
+    for line in df.itertuples():
+        u = line[1]
+        i = line[2]
+        user_set.add(u)
+        train_items.setdefault(u, []).append((u, i, line[3],line[4]))
+        if u not in test_items:
+            test_items[u] = (i, line[3], line[4])
+        else:
+            if test_items[u][2] < line[4]:
+                test_items[u] = (i, line[3], line[4])
+
+
+    test_data = [(key, value[0], value[1],  value[2]) for key, value in test_items.items()]
+    test_data_map = {}
+    for i in range(len(test_data)):
+        test_data_map[test_data[i][0]] = test_data[i]
+
+    test_file = open(path_save+"test.dat", 'a', encoding='utf-8')
+    test_writer = csv.writer(test_file, delimiter='\t', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
+    for i in test_data:
+        #test_writer.writerow([i[0] - 1 , i[1]-1 ,   i[2]])
+        test_writer.writerow([i[0]  , i[1] , i[2],  i[3]])
+
+    train_file = open(path_save+"train.dat", 'a', encoding='utf-8')
+    train_writer = csv.writer(train_file, delimiter='\t', lineterminator='\n', quoting=csv.QUOTE_MINIMAL)
+
+    for u in user_set:
+        sorted_items = sorted(train_items[u ], key=lambda tup: tup[3], reverse=False)
+        #print(sorted_items)
+
+        for i in sorted_items:
+            #print(test_data[u])
+            #print(sorted_items[i])
+            #print(u)
+            if i != test_data_map[u]:
+                train_writer.writerow([u , i[1], i[2], i[3]])
