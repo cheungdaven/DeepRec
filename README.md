@@ -3,6 +3,9 @@ In this repository, a number of deep learning based recommendation models are im
 We started this project in the hope that it would reduce the efforts of researchers and developers in reproducing state-of-the-art methods. The implemented models cover three major recommendation scenarios: rating prediction, top-N recommendation (i.e., item ranking) and sequential recommendation. Meanwhile, DeepRec maintains good modularity and extensibility for easy incorporation of new models into this framework. DeepRec is distributed under the GNU General Public License.
 
 
+Anyone who are interested in contributing the project, please contact me!
+
+
 # Algorithms Implemented
 We implemented both rating estimation, top-n recommendation models and sequence-aware recommendation models.
 * I-AutoRec and U-AutoRec (www'15)
