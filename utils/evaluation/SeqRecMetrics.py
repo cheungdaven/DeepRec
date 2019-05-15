@@ -101,7 +101,7 @@ def evaluate1(self):
     ndcg_at_5 = []
     ndcg_at_10 = []
     start_time = time.time()
-    user_factors, seq_factors, user_factors_2 = self.getUserParam(self.test_users)
+    user_factors, seq_factors, user_factors_2, _ = self.getUserParam(self.test_users)
     item_factors_1, item_factors_2, bias_item = self.getItemParam(np.expand_dims(np.arange(self.num_item), axis=1))
 
     #
