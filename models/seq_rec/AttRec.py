@@ -94,9 +94,8 @@ class AttRec():
 
 
 
-        self.loss = - tf.reduce_sum(tf.log(tf.sigmoid(self.negative_prediction) + 1e-10)) - tf.reduce_sum(
-            tf.log(1 - tf.sigmoid(self.target_prediction) + 1e-10)) \
-                    + tf.losses.get_regularization_loss() + 0.01 * (
+        self.loss = tf.reduce_sum(tf.maximum(self.target_prediction - self.negative_prediction + 0.5, 0)) \
+                    + tf.losses.get_regularization_loss() + 0.001 * (
         tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.V) + tf.nn.l2_loss(self.X) + tf.nn.l2_loss(self.Q))
 
 
