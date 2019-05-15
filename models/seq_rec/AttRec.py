@@ -152,13 +152,13 @@ class AttRec():
                                     kernel_initializer=tf.contrib.layers.xavier_initializer(), reuse=tf.AUTO_REUSE,
                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate)
                                     )
-            query = tf.layers.dropout(query, rate=0.0)
+            #query = tf.layers.dropout(query, rate=0.0)
             key = tf.layers.dense(inputs=key, name="linear_project", units=self.num_factor, activation=tf.nn.relu,
                                   use_bias=False,
                                   kernel_initializer=tf.contrib.layers.xavier_initializer(), reuse=tf.AUTO_REUSE,
                                   kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate),
                                   )
-            key = tf.layers.dropout(key, rate=0.3)
+            #key = tf.layers.dropout(key, rate=0.3)
         else:
             query = tf.layers.dense(inputs=query, name="linear_project", units=self.num_factor, activation=tf.nn.relu,
                                     use_bias=False,
