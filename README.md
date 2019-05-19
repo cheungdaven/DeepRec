@@ -55,8 +55,3 @@ or
  }
 ```
 Thank you for your support!
-
-# Collaborators
-Details of the developers can be found as follows.
-
-[Shuai Zhang](https://sites.google.com/view/shuaizhang/home), [Yi Tay](https://sites.google.com/view/yitay/home), Lei Cao (UNSW), [Bin Wu](https://wubinzzu.github.io/)
