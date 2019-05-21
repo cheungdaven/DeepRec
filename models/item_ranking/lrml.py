@@ -53,7 +53,7 @@ class LRML():
         self.T = T
         self.mode = mode
         self.display_step = display_step
-        self.init = 1 / (num_factor ** 0.5)
+        # self.init = 1 / (num_factor ** 0.5)
         self.num_mem = num_mem
         print("LRML.")
 
@@ -82,6 +82,8 @@ class LRML():
     def build_network(self, num_factor=100, margin=0.5, norm_clip_value=1):
         """ Main computational graph
         """
+        # stddev initialize
+        init = 1 / (num_factor ** 0.5)
 
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
