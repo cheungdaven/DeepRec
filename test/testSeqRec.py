@@ -3,13 +3,13 @@ import tensorflow as tf
 import sys
 import os
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from models.seq_rec.Caser import Caser
 from models.seq_rec.AttRec import AttRec
 from models.seq_rec.PRME import PRME
 from utils.load_data.load_data_seq import DataSet
 from utils.load_data.load_data_ranking import *
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 def parse_args():
     parser = argparse.ArgumentParser(description='DeepRec')
