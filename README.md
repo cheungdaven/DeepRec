@@ -50,7 +50,7 @@ or
  @inproceedings{shuai2019deeprec,
    title={DeepRec: An Open-source Toolkit for Deep Learning based Recommendation},
    author={Shuai Zhang, Yi Tay, Lina Yao, Bin Wu, Aixin Sun},
-   booktitle={Preprint},
+   journal={arXiv preprint arXiv:1905.10536},
    year={2019}
  }
 ```
