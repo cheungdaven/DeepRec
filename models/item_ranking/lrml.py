@@ -30,7 +30,7 @@ class LRML():
     def __init__(self, sess, num_user, num_item, learning_rate=0.1,
                  reg_rate=0.1, epoch=500, batch_size=500,
                  verbose=False, T=5, display_step=1000, mode=1,
-                 copy_relations=True, dist='L1', num_mem=10):
+                 copy_relations=True, dist='L1', num_mem=100):
         """ This model takes after the CML structure implemented by Shuai.
         There are several new hyperparameters introduced which are explained
         as follows:
@@ -55,10 +55,12 @@ class LRML():
         self.display_step = display_step
         # self.init = 1 / (num_factor ** 0.5)
         self.num_mem = num_mem
+        self.copy_relations = copy_relations
+        self.dist = dist
         print("LRML.")
 
-    def lram(a, b, dropout,
-             reuse=None, initializer=None, k=10):
+    def lram(self, a, b,
+             reuse=None, initializer=None, k=10, relation=None):
         """ Generates relation given user (a) and item(b)
         """
         with tf.variable_scope('lrml', reuse=reuse) as scope:
@@ -101,7 +103,7 @@ class LRML():
                                     reuse=None,
                                     initializer=tf.random_normal_initializer(init),
                                     k=self.num_mem)
-        if (copy_relations == False):
+        if (self.copy_relations == False):
             selected_memory_neg = self.lram(user_embedding, neg_item_embedding,
                                             reuse=True,
                                             initializer=tf.random_normal_initializer(init),
@@ -110,12 +112,12 @@ class LRML():
             selected_memory_neg = selected_memory
 
         energy_pos = item_embedding - (user_embedding + selected_memory)
-        energy_neg = item_embedding_neg - (user_embedding + selected_memory_neg)
+        energy_neg = neg_item_embedding - (user_embedding + selected_memory_neg)
 
-        if (dist == 'L2'):
+        if (self.dist == 'L2'):
             pos_dist = tf.sqrt(tf.reduce_sum(tf.square(energy_pos), 1) + 1E-3)
             neg_dist = tf.sqrt(tf.reduce_sum(tf.square(energy_neg), 1) + 1E-3)
-        elif (dist == 'L1'):
+        elif (self.dist == 'L1'):
             pos_dist = tf.reduce_sum(tf.abs(energy_pos), 1)
             neg_dist = tf.reduce_sum(tf.abs(energy_neg), 1)
 
@@ -190,7 +192,7 @@ class LRML():
         for epoch in range(self.epochs):
             self.train()
             if (epoch) % self.T == 0:
-                print("Epoch: %04d; " % (epoch), end='')
+                print("Epoch: %04d; " % (epoch), end="")
                 self.test()
 
     def save(self, path):
