@@ -73,7 +73,10 @@ def map_mrr_ndcg(rankedlist, test_matrix):
         map = ap / count
 
     max = len(b1) - 1
-    count_test = max - hits[0][0]
+    if count != 0:
+        count_test = max - hits[0][0]
+    else:
+        count_test = 0
     auc = 1.0 * count_test /max
     return auc, mrr, float(dcg / idcg)
 
