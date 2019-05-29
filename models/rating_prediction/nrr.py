@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 """Implementation of Neural Rating Regression.
-Reference: Dziugaite, Gintare Karolina, and Daniel M. Roy. "Neural network matrix factorization." arXiv preprint arXiv:1511.06443 (2015).
+Reference: Piji Li, Zihao Wang, Zhaochun Ren, Lidong Bing, Wai Lam. "Neural Rating Regression with Abstractive Tips Generation for Recommendation
+Authors." https://arxiv.org/pdf/1708.00154.pdf
 """
+
+
+
 
 import tensorflow as tf
 import time
