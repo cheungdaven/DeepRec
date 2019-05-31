@@ -38,7 +38,7 @@ class AttRec():
         self.neg_items = dict()
         print("AttSeqRec.")
 
-    def build_network(self, L, num_T, num_factor=100, num_neg=1):
+    def build_network(self, L, num_T, num_factor=150, num_neg=1):
 
         self.L = L
         self.num_T = num_T
