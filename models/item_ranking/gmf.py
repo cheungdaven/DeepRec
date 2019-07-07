@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """Implementation of Neural Collaborative Filtering.
-Reference: He, Xiangnan, et al. "Neural collaborative filtering." Proceedings of the 26th International Conference on World Wide Web. International World Wide Web Conferences Steering Committee, 2017.
+Reference: He, Xiangnan, et al. "Neural collaborative filtering." Proceedings of the 26th International Conference
+on World Wide Web. International World Wide Web Conferences Steering Committee, 2017.
 """
 
 import tensorflow as tf
 import time
-
 import random
-
 from utils.evaluation.RankingMetrics import *
 
 __author__ = "Shuai Zhang"
@@ -20,20 +19,40 @@ __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
 
-class GMF():
+class GMF(object):
     def __init__(self, sess, num_user, num_item, learning_rate=0.5, reg_rate=0.01, epoch=500, batch_size=256,
-                 verbose=False, T=1, display_step=1000):
-        self.learning_rate = learning_rate
-        self.epochs = epoch
-        self.batch_size = batch_size
-        self.reg_rate = reg_rate
+                 verbose=False, t=1, display_step=1000):
         self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
+        self.learning_rate = learning_rate
+        self.reg_rate = reg_rate
+        self.epochs = epoch
+        self.batch_size = batch_size
         self.verbose = verbose
-        self.T = T
+        self.T = t
         self.display_step = display_step
-        print("NeuMF.")
+
+        self.num_neg_sample = None
+        self.user_id = None
+        self.item_id = None
+        self.y = None
+        self.P = None
+        self.Q = None
+        self.pred_y = None
+        self.loss = None
+        self.optimizer = None
+
+        self.test_data = None
+        self.user = None
+        self.item = None
+        self.label = None
+        self.neg_items = None
+        self.test_users = None
+
+        self.num_training = None
+        self.total_batch = None
+        print("You are running GMF.")
 
     def build_network(self, num_factor=10, num_neg_sample=20):
         self.num_neg_sample = num_neg_sample
@@ -46,25 +65,26 @@ class GMF():
 
         user_latent_factor = tf.nn.embedding_lookup(self.P, self.user_id)
         item_latent_factor = tf.nn.embedding_lookup(self.Q, self.item_id)
-        GMF = tf.multiply(user_latent_factor, item_latent_factor)
+        _GMF = tf.multiply(user_latent_factor, item_latent_factor)
 
-        self.pred_y = tf.nn.sigmoid(tf.reduce_sum(GMF, axis=1))
+        self.pred_y = tf.nn.sigmoid(tf.reduce_sum(_GMF, axis=1))
 
+        # -{y.log(p{y=1}) + (1-y).log(1 - p{y=1})} + {regularization loss...}
         self.loss = - tf.reduce_sum(
-            self.y * tf.log(self.pred_y + 1e-10) + (1 - self.y) * tf.log(1 - self.pred_y + 1e-10)) \
-                    + self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
+            self.y * tf.log(self.pred_y + 1e-10) + (1 - self.y) * tf.log(1 - self.pred_y + 1e-10)) + \
+            self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
 
         self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss)
 
         return self
 
     def prepare_data(self, train_data, test_data):
-        '''
-        You must prepare the data before train and test the model
+        """
+        You must prepare the data before train and test the model.
         :param train_data:
         :param test_data:
         :return:
-        '''
+        """
         t = train_data.tocoo()
         self.user = list(t.row.reshape(-1))
         self.item = list(t.col.reshape(-1))
@@ -78,7 +98,6 @@ class GMF():
         return self
 
     def train(self):
-
         item_temp = self.item[:]
         user_temp = self.user[:]
         labels_temp = self.label[:]
@@ -123,7 +142,6 @@ class GMF():
         evaluate(self)
 
     def execute(self, train_data, test_data):
-
         self.prepare_data(train_data, test_data)
 
         init = tf.global_variables_initializer()
@@ -131,8 +149,8 @@ class GMF():
 
         for epoch in range(self.epochs):
             self.train()
-            if (epoch) % self.T == 0:
-                print("Epoch: %04d; " % (epoch), end='')
+            if epoch % self.T == 0:
+                print("Epoch: %04d; " % epoch, end='')
                 self.test()
 
     def save(self, path):

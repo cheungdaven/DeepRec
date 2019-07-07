@@ -20,20 +20,42 @@ __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
 
-class NeuMF():
+class NeuMF(object):
     def __init__(self, sess, num_user, num_item, learning_rate=0.5, reg_rate=0.01, epoch=500, batch_size=256,
-                 verbose=False, T=1, display_step=1000):
-        self.learning_rate = learning_rate
-        self.epochs = epoch
-        self.batch_size = batch_size
-        self.reg_rate = reg_rate
+                 verbose=False, t=1, display_step=1000):
         self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
+        self.learning_rate = learning_rate
+        self.reg_rate = reg_rate
+        self.epochs = epoch
+        self.batch_size = batch_size
         self.verbose = verbose
-        self.T = T
+        self.T = t
         self.display_step = display_step
-        print("NeuMF.")
+
+        self.num_neg_sample = None
+        self.user_id = None
+        self.item_id = None
+        self.y = None
+        self.P = None
+        self.Q = None
+        self.mlp_P = None
+        self.mlp_Q = None
+        self.pred_y = None
+        self.loss = None
+        self.optimizer = None
+
+        self.test_data = None
+        self.user = None
+        self.item = None
+        self.label = None
+        self.neg_items = None
+        self.test_users = None
+
+        self.num_training = None
+        self.total_batch = None
+        print("You are running NeuMF.")
 
     def build_network(self, num_factor=10, num_factor_mlp=64, hidden_dimension=10, num_neg_sample=30):
         self.num_neg_sample = num_neg_sample
@@ -52,45 +74,69 @@ class NeuMF():
         mlp_user_latent_factor = tf.nn.embedding_lookup(self.mlp_P, self.user_id)
         mlp_item_latent_factor = tf.nn.embedding_lookup(self.mlp_Q, self.item_id)
 
-        GMF = tf.multiply(user_latent_factor, item_latent_factor)
+        _GMF = tf.multiply(user_latent_factor, item_latent_factor)
 
-        layer_1 = tf.layers.dense(inputs=tf.concat([mlp_item_latent_factor, mlp_user_latent_factor], axis=1),
-                                  units=num_factor_mlp * 2, kernel_initializer=tf.random_normal_initializer,
-                                  activation=tf.nn.relu,
-                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        layer_2 = tf.layers.dense(inputs=layer_1, units=hidden_dimension * 8, activation=tf.nn.relu,
-                                  kernel_initializer=tf.random_normal_initializer,
-                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        layer_3 = tf.layers.dense(inputs=layer_2, units=hidden_dimension * 4, activation=tf.nn.relu,
-                                  kernel_initializer=tf.random_normal_initializer,
-                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        layer_4 = tf.layers.dense(inputs=layer_3, units=hidden_dimension * 2, activation=tf.nn.relu,
-                                  kernel_initializer=tf.random_normal_initializer,
-                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
-        MLP = tf.layers.dense(inputs=layer_4, units=hidden_dimension, activation=tf.nn.relu,
-                              kernel_initializer=tf.random_normal_initializer,
-                              kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_1 = tf.layers.dense(
+            inputs=tf.concat([mlp_item_latent_factor, mlp_user_latent_factor], axis=1),
+            units=num_factor_mlp * 2,
+            kernel_initializer=tf.random_normal_initializer,
+            activation=tf.nn.relu,
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
 
-        self.pred_y = tf.nn.sigmoid(tf.reduce_sum(tf.concat([GMF, MLP], axis=1), 1))
+        layer_2 = tf.layers.dense(
+            inputs=layer_1,
+            units=hidden_dimension * 8,
+            activation=tf.nn.relu,
+            kernel_initializer=tf.random_normal_initializer,
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
 
-        # self.pred_y = tf.layers.dense(inputs=tf.concat([GMF, MLP], axis=1), units=1, activation=tf.sigmoid, kernel_initializer=tf.random_normal_initializer, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_3 = tf.layers.dense(
+            inputs=layer_2,
+            units=hidden_dimension * 4,
+            activation=tf.nn.relu,
+            kernel_initializer=tf.random_normal_initializer,
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
 
+        layer_4 = tf.layers.dense(
+            inputs=layer_3,
+            units=hidden_dimension * 2,
+            activation=tf.nn.relu,
+            kernel_initializer=tf.random_normal_initializer,
+            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+
+        _MLP = tf.layers.dense(
+                inputs=layer_4,
+                units=hidden_dimension,
+                activation=tf.nn.relu,
+                kernel_initializer=tf.random_normal_initializer,
+                kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+
+        self.pred_y = tf.nn.sigmoid(tf.reduce_sum(tf.concat([_GMF, _MLP], axis=1), 1))
+
+        # self.pred_y = tf.layers.dense(
+        #     inputs=tf.concat([_GMF, _MLP], axis=1), units=1, activation=tf.sigmoid,
+        #     kernel_initializer=tf.random_normal_initializer,
+        #     kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+
+        # -{y.log(p{y=1}) + (1-y).log(1 - p{y=1})} + {regularization loss...}
         self.loss = - tf.reduce_sum(
-            self.y * tf.log(self.pred_y + 1e-10) + (1 - self.y) * tf.log(1 - self.pred_y + 1e-10)) \
-                    + tf.losses.get_regularization_loss() + self.reg_rate * (
-        tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q) + tf.nn.l2_loss(self.mlp_P) + tf.nn.l2_loss(self.mlp_Q))
+            self.y * tf.log(self.pred_y + 1e-10) + (1 - self.y) * tf.log(1 - self.pred_y + 1e-10)) + \
+            tf.losses.get_regularization_loss() + \
+            self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q) +
+                             tf.nn.l2_loss(self.mlp_P) + tf.nn.l2_loss(self.mlp_Q))
 
         self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss)
 
         return self
 
     def prepare_data(self, train_data, test_data):
-        '''
-        You must prepare the data before train and test the model
+        """
+        You must prepare the data before train and test the model.
+
         :param train_data:
         :param test_data:
         :return:
-        '''
+        """
         t = train_data.tocoo()
         self.user = list(t.row.reshape(-1))
         self.item = list(t.col.reshape(-1))
@@ -104,7 +150,6 @@ class NeuMF():
         return self
 
     def train(self):
-
         item_temp = self.item[:]
         user_temp = self.user[:]
         labels_temp = self.label[:]
@@ -149,7 +194,6 @@ class NeuMF():
         evaluate(self)
 
     def execute(self, train_data, test_data):
-
         self.prepare_data(train_data, test_data)
 
         init = tf.global_variables_initializer()
@@ -157,8 +201,8 @@ class NeuMF():
 
         for epoch in range(self.epochs):
             self.train()
-            if (epoch) % self.T == 0:
-                print("Epoch: %04d; " % (epoch), end='')
+            if epoch % self.T == 0:
+                print("Epoch: %04d; " % epoch, end='')
                 self.test()
 
     def save(self, path):
