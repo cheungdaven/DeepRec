@@ -36,7 +36,7 @@ To use the code, run: Test/test_item_ranking.py, Test/test_rating_pred.py, or Te
 To acknowledge use of this open source package in publications, please cite either of the following papers:
 
 ```
-@article{zhang2019deeprec,
+@article{zhang2019deeprecsyscsur,
   title={Deep learning based recommender system: A survey and new perspectives},
   author={Zhang, Shuai and Yao, Lina and Sun, Aixin and Tay, Yi},
   journal={ACM Computing Surveys (CSUR)},
