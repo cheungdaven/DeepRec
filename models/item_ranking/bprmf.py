@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Implementation of Bayesain Personalized Ranking Model.
-Reference: Rendle, Steffen, et al. "BPR: Bayesian personalized ranking from implicit feedback." Proceedings of the twenty-fifth conference on uncertainty in artificial intelligence. AUAI Press, 2009..
+Reference: Rendle, Steffen, et al. "BPR: Bayesian personalized ranking from implicit feedback." Proceedings of
+the twenty-fifth conference on uncertainty in artificial intelligence. AUAI Press, 2009..
 """
 
 import tensorflow as tf
@@ -19,23 +20,42 @@ __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
 
-class BPRMF():
+class BPRMF(object):
     def __init__(self, sess, num_user, num_item, learning_rate=0.001, reg_rate=0.1, epoch=500, batch_size=1024,
-                 verbose=False, T=5, display_step=1000):
-        self.learning_rate = learning_rate
-        self.epochs = epoch
-        self.batch_size = batch_size
-        self.reg_rate = reg_rate
+                 verbose=False, t=5, display_step=1000):
         self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
+        self.learning_rate = learning_rate
+        self.reg_rate = reg_rate
+        self.epochs = epoch
+        self.batch_size = batch_size
         self.verbose = verbose
-        self.T = T
+        self.T = t
         self.display_step = display_step
-        print("BPRMF.")
+
+        self.user_id = None
+        self.item_id = None
+        self.neg_item_id = None
+        self.y = None
+        self.P = None
+        self.Q = None
+        self.pred_y = None
+        self.pred_y_neg = None
+        self.loss = None
+        self.optimizer = None
+
+        self.test_data = None
+        self.user = None
+        self.item = None
+        self.neg_items = None
+        self.test_users = None
+
+        self.num_training = None
+        self.total_batch = None
+        print("You are running BPRMF.")
 
     def build_network(self, num_factor=30):
-
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
         self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
@@ -51,20 +71,19 @@ class BPRMF():
         self.pred_y = tf.reduce_sum(tf.multiply(user_latent_factor, item_latent_factor), 1)
         self.pred_y_neg = tf.reduce_sum(tf.multiply(user_latent_factor, neg_item_latent_factor), 1)
 
-        self.loss = - tf.reduce_sum(tf.log(tf.sigmoid(self.pred_y - self.pred_y_neg))) + self.reg_rate * (
-        tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
+        self.loss = - tf.reduce_sum(
+            tf.log(tf.sigmoid(self.pred_y - self.pred_y_neg))) +\
+            self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
-        return self
-
     def prepare_data(self, train_data, test_data):
-        '''
+        """
         You must prepare the data before train and test the model
         :param train_data:
         :param test_data:
         :return:
-        '''
+        """
         t = train_data.tocoo()
         self.user = t.row.reshape(-1)
         self.item = t.col.reshape(-1)
@@ -74,7 +93,6 @@ class BPRMF():
         self.neg_items = self._get_neg_items(train_data.tocsr())
         self.test_users = set([u for u in self.test_data.keys() if len(self.test_data[u]) > 0])
         print("data preparation finished.")
-        return self
 
     def train(self):
         idxs = np.random.permutation(self.num_training)  # shuffled ordering
@@ -106,7 +124,6 @@ class BPRMF():
         evaluate(self)
 
     def execute(self, train_data, test_data):
-
         self.prepare_data(train_data, test_data)
 
         init = tf.global_variables_initializer()
@@ -114,8 +131,8 @@ class BPRMF():
 
         for epoch in range(self.epochs):
             self.train()
-            if (epoch) % self.T == 0:
-                print("Epoch: %04d; " % (epoch), end='')
+            if epoch % self.T == 0:
+                print("Epoch: %04d; " % epoch, end='')
                 self.test()
 
     def save(self, path):
