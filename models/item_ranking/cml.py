@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Implementation of Collaborative Metric Learning.
-Reference: Hsieh, Cheng-Kang, et al. "Collaborative metric learning." Proceedings of the 26th International Conference on World Wide Web. International World Wide Web Conferences Steering Committee, 2017.
+Reference: Hsieh, Cheng-Kang, et al. "Collaborative metric learning." Proceedings of the 26th International
+Conference on World Wide Web. International World Wide Web Conferences Steering Committee, 2017.
 """
 
 import tensorflow as tf
 import time
-import numpy as np
 
 from utils.evaluation.RankingMetrics import *
 
@@ -19,20 +19,39 @@ __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
 
-class CML():
+class CML(object):
     def __init__(self, sess, num_user, num_item, learning_rate=0.1, reg_rate=0.1, epoch=500, batch_size=500,
-                 verbose=False, T=5, display_step=1000):
-        self.learning_rate = learning_rate
-        self.epochs = epoch
-        self.batch_size = batch_size
-        self.reg_rate = reg_rate
+                 verbose=False, t=5, display_step=1000):
         self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
+        self.learning_rate = learning_rate
+        self.reg_rate = reg_rate
+        self.epochs = epoch
+        self.batch_size = batch_size
         self.verbose = verbose
-        self.T = T
+        self.T = t
         self.display_step = display_step
-        print("CML.")
+
+        self.user_id = None
+        self.item_id = None
+        self.neg_item_id = None
+        self.keep_rate = None
+        self.pred_distance = None
+        self.pred_distance_neg = None
+        self.loss = None
+        self.optimizer = None
+        self.clip_P = None
+        self.clip_Q = None
+
+        self.user = None
+        self.item = None
+        self.num_training = None
+        self.test_data = None
+        self.total_batch = None
+        self.neg_items = None
+        self.test_users = None
+        print("You are running CML.")
 
     def build_network(self, num_factor=100, margin=0.5, norm_clip_value=1):
 
@@ -41,12 +60,14 @@ class CML():
         self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
         self.keep_rate = tf.placeholder(tf.float32)
 
-        P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=1 / (num_factor ** 0.5)), dtype=tf.float32)
-        Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=1 / (num_factor ** 0.5)), dtype=tf.float32)
+        _P = tf.Variable(
+            tf.random_normal([self.num_user, num_factor], stddev=1 / (num_factor ** 0.5)), dtype=tf.float32)
+        _Q = tf.Variable(
+            tf.random_normal([self.num_item, num_factor], stddev=1 / (num_factor ** 0.5)), dtype=tf.float32)
 
-        user_embedding = tf.nn.embedding_lookup(P, self.user_id)
-        item_embedding = tf.nn.embedding_lookup(Q, self.item_id)
-        neg_item_embedding = tf.nn.embedding_lookup(Q, self.neg_item_id)
+        user_embedding = tf.nn.embedding_lookup(_P, self.user_id)
+        item_embedding = tf.nn.embedding_lookup(_Q, self.item_id)
+        neg_item_embedding = tf.nn.embedding_lookup(_Q, self.neg_item_id)
 
         self.pred_distance = tf.reduce_sum(
             tf.nn.dropout(tf.squared_difference(user_embedding, item_embedding), self.keep_rate), 1)
@@ -55,19 +76,19 @@ class CML():
 
         self.loss = tf.reduce_sum(tf.maximum(self.pred_distance - self.pred_distance_neg + margin, 0))
 
-        self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss, var_list=[P, Q])
-        self.clip_P = tf.assign(P, tf.clip_by_norm(P, norm_clip_value, axes=[1]))
-        self.clip_Q = tf.assign(Q, tf.clip_by_norm(Q, norm_clip_value, axes=[1]))
+        self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss, var_list=[_P, _Q])
+        self.clip_P = tf.assign(_P, tf.clip_by_norm(_P, norm_clip_value, axes=[1]))
+        self.clip_Q = tf.assign(_Q, tf.clip_by_norm(_Q, norm_clip_value, axes=[1]))
 
         return self
 
     def prepare_data(self, train_data, test_data):
-        '''
+        """
         You must prepare the data before train and test the model
         :param train_data:
         :param test_data:
         :return:
-        '''
+        """
         t = train_data.tocoo()
         self.user = t.row.reshape(-1)
         self.item = t.col.reshape(-1)
@@ -78,7 +99,6 @@ class CML():
         self.test_users = set([u for u in self.test_data.keys() if len(self.test_data[u]) > 0])
         print(self.total_batch)
         print("data preparation finished.")
-        return self
 
     def train(self):
         idxs = np.random.permutation(self.num_training)  # shuffled ordering
@@ -120,8 +140,8 @@ class CML():
 
         for epoch in range(self.epochs):
             self.train()
-            if (epoch) % self.T == 0:
-                print("Epoch: %04d; " % (epoch), end='')
+            if epoch % self.T == 0:
+                print("Epoch: %04d; " % epoch, end='')
                 self.test()
 
     def save(self, path):
@@ -141,7 +161,7 @@ class CML():
         return neg_items
 
 
-class CMLwarp():
+class CMLwarp(object):
     """
     To appear.
 
@@ -149,50 +169,68 @@ class CMLwarp():
     """
 
     def __init__(self, sess, num_user, num_item, learning_rate=0.1, reg_rate=0.1, epoch=500, batch_size=500,
-                 verbose=False, T=5, display_step=1000):
-        self.learning_rate = learning_rate
-        self.epochs = epoch
-        self.batch_size = batch_size
-        self.reg_rate = reg_rate
+                 verbose=False, t=5, display_step=1000):
         self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
+        self.learning_rate = learning_rate
+        self.reg_rate = reg_rate
+        self.epochs = epoch
+        self.batch_size = batch_size
         self.verbose = verbose
-        self.T = T
+        self.T = t
         self.display_step = display_step
+
+        self.user_id = None
+        self.item_id = None
+        self.neg_item_id = None
+        self.keep_rate = None
+        self.pred_distance = None
+        self.pred_distance_neg = None
+        self.loss = None
+        self.optimizer = None
+        self.clip_P = None
+        self.clip_Q = None
+
+        self.user = None
+        self.item = None
+        self.num_training = None
+        self.test_data = None
+        self.total_batch = None
+        self.neg_items = None
+        self.test_users = None
         print("CML warp loss.")
 
     def build_network(self, num_factor=100, margin=0.5, norm_clip_value=1):
-
         self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
         self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
         self.neg_item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='neg_item_id')
 
-        P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=1 / (num_factor ** 0.5)))
-        Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=1 / (num_factor ** 0.5)))
+        _P = tf.Variable(tf.random_normal([self.num_user, num_factor], stddev=1 / (num_factor ** 0.5)))
+        _Q = tf.Variable(tf.random_normal([self.num_item, num_factor], stddev=1 / (num_factor ** 0.5)))
 
-        user_embedding = tf.nn.embedding_lookup(P, self.user_id)
-        item_embedding = tf.nn.embedding_lookup(Q, self.item_id)
-        neg_item_embedding = tf.nn.embedding_lookup(Q, self.neg_item_id)
+        user_embedding = tf.nn.embedding_lookup(_P, self.user_id)
+        item_embedding = tf.nn.embedding_lookup(_Q, self.item_id)
+        neg_item_embedding = tf.nn.embedding_lookup(_Q, self.neg_item_id)
 
         self.pred_distance = tf.reduce_sum(tf.squared_difference(user_embedding, item_embedding), 1)
         self.pred_distance_neg = tf.reduce_sum(tf.squared_difference(user_embedding, neg_item_embedding), 1)
 
         self.loss = tf.reduce_sum(tf.maximum(self.pred_distance - self.pred_distance_neg + margin, 0))
 
-        self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss, var_list=[P, Q])
-        self.clip_P = tf.assign(P, tf.clip_by_norm(P, norm_clip_value, axes=[1]))
-        self.clip_Q = tf.assign(Q, tf.clip_by_norm(Q, norm_clip_value, axes=[1]))
+        self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss, var_list=[_P, _Q])
+        self.clip_P = tf.assign(_P, tf.clip_by_norm(_P, norm_clip_value, axes=[1]))
+        self.clip_Q = tf.assign(_Q, tf.clip_by_norm(_Q, norm_clip_value, axes=[1]))
 
         return self
 
     def prepare_data(self, train_data, test_data):
-        '''
+        """
         You must prepare the data before train and test the model
         :param train_data:
         :param test_data:
         :return:
-        '''
+        """
         t = train_data.tocoo()
         self.user = t.row.reshape(-1)
         self.item = t.col.reshape(-1)
@@ -202,7 +240,6 @@ class CMLwarp():
         self.neg_items = self._get_neg_items(train_data.tocsr())
         self.test_users = set([u for u in self.test_data.keys() if len(self.test_data[u]) > 0])
         print("data preparation finished.")
-        return self
 
     def train(self):
         idxs = np.random.permutation(self.num_training)  # shuffled ordering
@@ -243,8 +280,8 @@ class CMLwarp():
 
         for epoch in range(self.epochs):
             self.train()
-            if (epoch) % self.T == 0:
-                print("Epoch: %04d; " % (epoch), end='')
+            if epoch % self.T == 0:
+                print("Epoch: %04d; " % epoch, end='')
                 self.test()
 
     def save(self, path):
