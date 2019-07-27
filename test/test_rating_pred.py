@@ -1,10 +1,9 @@
 import argparse
-import tensorflow as tf
 import sys
 import os.path
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+from models.rating_prediction.fm import FM
 from models.rating_prediction.nnmf import NNMF
 from models.rating_prediction.mf import MF
 from models.rating_prediction.nrr import NRR
@@ -13,10 +12,12 @@ from models.rating_prediction.nfm import NFM
 from utils.load_data.load_data_rating import *
 from utils.load_data.load_data_content import *
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description='nnRec')
-    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec', 'FM', 'NFM', 'AFM'], default='U-AutoRec')
-    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--model', choices=['MF', 'NNMF', 'NRR', 'I-AutoRec', 'U-AutoRec', 'FM', 'NFM', 'AFM'],
+                        default='U-AutoRec')
+    parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--num_factors', type=int, default=10)
     parser.add_argument('--display_step', type=int, default=1000)
     parser.add_argument('--batch_size', type=int, default=256)  # 128 for unlimpair
@@ -38,7 +39,6 @@ if __name__ == '__main__':
                                                              header=['user_id', 'item_id', 'rating', 't'],
                                                              test_size=0.1, sep="\t")
 
-
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
 
@@ -59,10 +59,20 @@ if __name__ == '__main__':
             train_data, test_data, feature_M = load_data_fm()
             n_user = 957
             n_item = 4082
-            model = NFM(sess, n_user, n_item)
+            model = NFM(sess, n_user, n_item, epoch=2)
             model.build_network(feature_M)
-            model.execute(train_data, test_data)
+        if args.model == "FM":
+            train_data, test_data, feature_M = load_data_fm()
+            n_user = 957
+            n_item = 4082
+            model = FM(sess, n_user, n_item, learning_rate=learning_rate, reg_rate=reg_rate, epoch=epochs,
+                       batch_size=batch_size, display_step=display_step)
+            model.build_network(feature_M)
+
         # build and execute the model
         if model is not None:
-            model.build_network()
-            model.execute(train_data, test_data)
+            if args.model in ('FM', 'NFM'):
+                model.execute(train_data, test_data)
+            else:
+                model.build_network()
+                model.execute(train_data, test_data)

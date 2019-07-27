@@ -93,7 +93,7 @@ class FM():
             start_time = time.time()
             batch_y = train_data['Y'][i * self.batch_size:(i + 1) * self.batch_size]
             batch_x = train_data['X'][i * self.batch_size:(i + 1) * self.batch_size]
-            print(batch_x)
+            # print(batch_x)
             loss, opt = self.sess.run((self.loss, self.optimizer), feed_dict={self.train_features: batch_x,
                                                                               self.y: batch_y,
                                                                               self.dropout_keep:0.5})
