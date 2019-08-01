@@ -55,3 +55,5 @@ or
  }
 ```
 Thank you for your support!
+
+The chinese version is host [here](https://code.ihub.org.cn/projects/274).
