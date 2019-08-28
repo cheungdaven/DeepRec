@@ -10,6 +10,7 @@ from models.rating_prediction.nrr import NRR
 from models.rating_prediction.autorec import *
 from models.rating_prediction.nfm import NFM
 from models.rating_prediction.deepfm import DeepFM
+from models.rating_prediction.afm import AFM
 from utils.load_data.load_data_rating import *
 from utils.load_data.load_data_content import *
 
@@ -98,9 +99,17 @@ if __name__ == '__main__':
             model = DeepFM(sess, n_user, n_item, **kws)
             model.build_network(feature_M)
 
+        if args.model == "AFM":
+            train_data, test_data, feature_M = load_data_fm()
+            n_user = 957
+            n_item = 4082
+            model = AFM(sess, n_user, n_item, learning_rate=learning_rate, reg_rate=reg_rate, epoch=epochs,
+                        batch_size=batch_size, display_step=display_step)
+            model.build_network(feature_M)
+
         # build and execute the model
         if model is not None:
-            if args.model in ('FM', 'NFM', 'DEEP-FM'):
+            if args.model in ('FM', 'NFM', 'DEEP-FM', 'AFM'):
                 model.execute(train_data, test_data)
             else:
                 model.build_network()
