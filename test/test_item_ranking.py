@@ -41,30 +41,33 @@ if __name__ == '__main__':
 
     train_data, test_data, n_user, n_item = load_data_neg(test_size=0.2, sep="\t")
 
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
+    try:
+        gpus = tf.config.experimental.list_physical_devices('GPU')
+        tf.config.experimental.set_memory_growth(gpus[0], True)
+    except:
+        # Invalid device or cannot modify virtual devices once initialized.
+        pass
 
-    with tf.Session(config=config) as sess:
-        model = None
-        # Model selection
-        if args.model == "CDAE":
-            train_data, test_data, n_user, n_item = load_data_all(test_size=0.2, sep="\t")
-            model = ICDAE(sess, n_user, n_item)
-        if args.model == "CML":
-            model = CML(sess, n_user, n_item)
-        if args.model == "LRML":
-            model = LRML(sess, n_user, n_item)
-        if args.model == "BPRMF":
-            model = BPRMF(sess, n_user, n_item)
-        if args.model == "NeuMF":
-            model = NeuMF(sess, n_user, n_item)
-        if args.model == "GMF":
-            model = GMF(sess, n_user, n_item)
-        if args.model == "MLP":
-            model = MLP(sess, n_user, n_item)
-        if args.model == "JRL":
-            model = JRL(sess, n_user, n_item)
-        # build and execute the model
-        if model is not None:
-            model.build_network()
-            model.execute(train_data, test_data)
+    model = None
+    # Model selection
+    if args.model == "CDAE":
+        train_data, test_data, n_user, n_item = load_data_all(test_size=0.2, sep="\t")
+        model = ICDAE(n_user, n_item)
+    if args.model == "CML":
+        model = CML(n_user, n_item)
+    if args.model == "LRML":
+        model = LRML(n_user, n_item)
+    if args.model == "BPRMF":
+        model = BPRMF(n_user, n_item)
+    if args.model == "NeuMF":
+        model = NeuMF(n_user, n_item)
+    if args.model == "GMF":
+        model = GMF(n_user, n_item)
+    if args.model == "MLP":
+        model = MLP(n_user, n_item)
+    if args.model == "JRL":
+        model = JRL(n_user, n_item)
+    # build and execute the model
+    if model is not None:
+        model.build_network()
+        model.execute(train_data, test_data)
