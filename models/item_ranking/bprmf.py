@@ -27,12 +27,6 @@ class EmbeddingLookup(tf.keras.layers.Layer):
         super(EmbeddingLookup, self).__init__(**kwargs)
         self.input_embedding = input_embedding
 
-    # def build(self, input_shape):
-    #     self.embeddings = self.add_weight(
-    #         shape=(self.input_dim, self.output_dim),
-    #         initializer='random_normal',
-    #         dtype='float32')
-
     def call(self, inputs):
         return tf.nn.embedding_lookup(self.input_embedding, inputs)
 
@@ -60,6 +54,7 @@ class BPRMF(object):
         self.loss = None
         self.loss_estimator = tf.keras.metrics.Mean(name='train_loss')
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
+        self.model = None
 
         self.test_data = None
         self.user = None
@@ -74,9 +69,7 @@ class BPRMF(object):
     def build_network(self, num_factor=30):
         self.P = tf.Variable(tf.random.normal([self.num_user, num_factor], stddev=0.01))
         self.Q = tf.Variable(tf.random.normal([self.num_item, num_factor], stddev=0.01))
-        # user_id = tf.squeeze(self.user_id)
-        # item_id = tf.squeeze(self.item_id)
-        # neg_item_id = tf.squeeze(self.neg_item_id)
+
         user_id = Lambda(lambda x: tf.squeeze(x))(self.user_id)
         item_id = Lambda(lambda x: tf.squeeze(x))(self.item_id)
         neg_item_id = Lambda(lambda x: tf.squeeze(x))(self.neg_item_id)
@@ -84,15 +77,11 @@ class BPRMF(object):
         user_latent_factor = EmbeddingLookup(self.P)(user_id)
         item_latent_factor = EmbeddingLookup(self.Q)(item_id)
         neg_item_latent_factor = EmbeddingLookup(self.Q)(neg_item_id)
-        # user_latent_factor = tf.nn.embedding_lookup(self.P, user_id)
-        # item_latent_factor = tf.nn.embedding_lookup(self.Q, item_id)
-        # neg_item_latent_factor = tf.nn.embedding_lookup(self.Q, neg_item_id)
 
         pred_y = tf.reduce_sum(tf.multiply(user_latent_factor, item_latent_factor), 1)
         pred_y_neg = tf.reduce_sum(tf.multiply(user_latent_factor, neg_item_latent_factor), 1)
         self.model = Model(inputs=[self.user_id, self.item_id, self.neg_item_id],
                            outputs=[pred_y, pred_y_neg])
-        # self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
     def prepare_data(self, train_data, test_data):
         """
@@ -114,7 +103,7 @@ class BPRMF(object):
     @tf.function
     def train_op(self, batch_user, batch_item, batch_item_neg):
         with tf.GradientTape() as tape:
-            pred_y, pred_y_neg = self.model([batch_item, batch_user, batch_item_neg])
+            pred_y, pred_y_neg = self.model([batch_user, batch_item, batch_item_neg])
             loss = - tf.reduce_sum(
                 tf.math.log(tf.sigmoid(pred_y - pred_y_neg))) + \
                    self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))

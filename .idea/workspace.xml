@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/DeepRec.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DeepRec.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/bprmf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/bprmf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/item_ranking/cdae.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/cdae.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,6 +20,11 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GithubProjectSettings">
+    <option name="CREATE_PULL_REQUEST_DEFAULT_BRANCH" value="master" />
+    <option name="CREATE_PULL_REQUEST_DEFAULT_REPO_USER" value="cheungdaven" />
+    <option name="CREATE_PULL_REQUEST_DEFAULT_REPO_NAME" value="DeepRec" />
   </component>
   <component name="ProjectId" id="1XbVYA5EOsw6xBlmEpOLOgxvRZs" />
   <component name="PropertiesComponent">
@@ -34,7 +43,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="web.server" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -64,9 +73,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="sftp://soonmok@home-server.local:88/home/soonmok/anaconda3/envs/tf2/bin/python3.7" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -98,8 +107,19 @@
       <workItem from="1555722792785" duration="268000" />
       <workItem from="1581314827022" duration="2926000" />
       <workItem from="1581321994452" duration="734000" />
-      <workItem from="1581323048834" duration="103000" />
+      <workItem from="1581323048834" duration="660000" />
+      <workItem from="1583135944300" duration="2824000" />
+      <workItem from="1584253374849" duration="978000" />
+      <workItem from="1584264811754" duration="1924000" />
     </task>
+    <task id="LOCAL-00001" summary="convert tensorflow version into 2">
+      <created>1581323248675</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1581323248675</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -118,7 +138,23 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="convert tensorflow version into 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="convert tensorflow version into 2" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="np_batch_item_neg" />
+        <watch expression="batch_item_neg" />
+        <watch expression="np.expand_dims(np.array(batch_item_neg), -1)" />
+        <watch expression="a" />
+        <watch expression="batch_item_neg" />
+        <watch expression="batch_item" />
+      </configuration>
+    </watches-manager>
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1581323153219" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584266722252" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>
