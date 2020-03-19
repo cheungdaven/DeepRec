@@ -5,7 +5,7 @@ import os.path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from models.item_ranking.cdae import ICDAE
+from models.item_ranking.cdae import ICDAE, CDAE
 from models.item_ranking.bprmf import BPRMF
 from models.item_ranking.cml import CML
 from models.item_ranking.neumf import NeuMF
@@ -52,7 +52,8 @@ if __name__ == '__main__':
     # Model selection
     if args.model == "CDAE":
         train_data, test_data, n_user, n_item = load_data_all(test_size=0.2, sep="\t")
-        model = ICDAE(n_user, n_item)
+        # model = ICDAE(n_user, n_item)
+        model = CDAE(n_user, n_item)
     if args.model == "CML":
         model = CML(n_user, n_item)
     if args.model == "LRML":

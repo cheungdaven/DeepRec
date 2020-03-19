@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/DeepRec.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DeepRec.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="convert tensorflow version on CDAE model">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/bprmf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/bprmf.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/cdae.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/cdae.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_item_ranking.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_item_ranking.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,6 +26,7 @@
   </component>
   <component name="ProjectId" id="1XbVYA5EOsw6xBlmEpOLOgxvRZs" />
   <component name="PropertiesComponent">
+    <property name="TODO_SCOPE" value="All Places" />
     <property name="WebServerToolWindowFactoryState" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
@@ -80,7 +79,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/test_item_ranking.py" />
-      <option name="PARAMETERS" value="--model=&quot;BPRMF&quot;" />
+      <option name="PARAMETERS" value="--model=&quot;CDAE&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -110,7 +109,10 @@
       <workItem from="1581323048834" duration="660000" />
       <workItem from="1583135944300" duration="2824000" />
       <workItem from="1584253374849" duration="978000" />
-      <workItem from="1584264811754" duration="1924000" />
+      <workItem from="1584264811754" duration="6152000" />
+      <workItem from="1584364194784" duration="1000" />
+      <workItem from="1584368854330" duration="6810000" />
+      <workItem from="1584534192487" duration="6387000" />
     </task>
     <task id="LOCAL-00001" summary="convert tensorflow version into 2">
       <created>1581323248675</created>
@@ -119,7 +121,14 @@
       <option name="project" value="LOCAL" />
       <updated>1581323248675</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fixed minor bug">
+      <created>1584266835830</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1584266835830</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,21 +149,18 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="convert tensorflow version into 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="convert tensorflow version into 2" />
+    <MESSAGE value="fixed minor bug" />
+    <MESSAGE value="convert tensorflow version on CDAE model" />
+    <option name="LAST_COMMIT_MESSAGE" value="convert tensorflow version on CDAE model" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="np_batch_item_neg" />
-        <watch expression="batch_item_neg" />
-        <watch expression="np.expand_dims(np.array(batch_item_neg), -1)" />
-        <watch expression="a" />
-        <watch expression="batch_item_neg" />
-        <watch expression="batch_item" />
+        <watch expression="self._get_corrupted_input(self.train_data[batch_set_idx, :], self.corruption_level)" language="Python" />
       </configuration>
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584266722252" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584544371836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>
