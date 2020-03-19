@@ -131,6 +131,7 @@ class BPRMF(object):
             np_batch_user = np.expand_dims(np.array(batch_user), -1)
             np_batch_item = np.expand_dims(np.array(batch_item), -1)
             np_batch_item_neg = np.expand_dims(np.array(batch_item_neg), -1)
+
             self.train_op(np_batch_user, np_batch_item, np_batch_item_neg)
 
             if i % self.display_step == 0:

@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/bprmf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/bprmf.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/cdae.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/cdae.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_item_ranking.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_item_ranking.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -113,6 +112,7 @@
       <workItem from="1584364194784" duration="1000" />
       <workItem from="1584368854330" duration="6810000" />
       <workItem from="1584534192487" duration="6387000" />
+      <workItem from="1584622429664" duration="3796000" />
     </task>
     <task id="LOCAL-00001" summary="convert tensorflow version into 2">
       <created>1581323248675</created>
@@ -128,7 +128,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584266835830</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="convert tensorflow version on CDAE model">
+      <created>1584622487222</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1584622487222</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -161,6 +168,6 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584544371836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584627294058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>
