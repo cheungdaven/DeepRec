@@ -44,9 +44,9 @@ class BPRMF(object):
         self.T = t
         self.display_step = display_step
 
-        self.user_id = Input(shape=(1,), dtype=tf.int32, name='user_id')
-        self.item_id = Input(shape=(1,), dtype=tf.int32, name='item_id')
-        self.neg_item_id = Input(shape=(1,), dtype=tf.int32, name='neg_item_id')
+        self.user_id = None
+        self.item_id = None
+        self.neg_item_id = None
         self.P = None
         self.Q = None
         self.pred_y = None
@@ -67,6 +67,10 @@ class BPRMF(object):
         print("You are running BPRMF.")
 
     def build_network(self, num_factor=30):
+        self.user_id = Input(shape=(1,), dtype=tf.int32, name='user_id')
+        self.item_id = Input(shape=(1,), dtype=tf.int32, name='item_id')
+        self.neg_item_id = Input(shape=(1,), dtype=tf.int32, name='neg_item_id')
+
         self.P = tf.Variable(tf.random.normal([self.num_user, num_factor], stddev=0.01))
         self.Q = tf.Variable(tf.random.normal([self.num_item, num_factor], stddev=0.01))
 

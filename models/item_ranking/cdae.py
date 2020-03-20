@@ -9,7 +9,7 @@ import time
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import Input, Model, regularizers
-from tensorflow.keras.layers import Dense, Add, Lambda, Reshape, Activation
+from tensorflow.keras.layers import Dense, Add, Flatten, Reshape, Activation
 
 from utils.evaluation.RankingMetrics import evaluate
 
@@ -74,7 +74,7 @@ class CDAE(object):
 
         _V = tf.Variable(tf.random.normal([self.num_user, hidden_neuron], stddev=0.01))
 
-        squeezed_user_id = Lambda(lambda x: tf.squeeze(x))(user_id)
+        squeezed_user_id = Flatten()(user_id)
         user_latent_factor = EmbeddingLookup(_V)(squeezed_user_id)
         user_latent_factor = Reshape((_V.shape[-1],))(user_latent_factor)
         z_vector = Dense(hidden_neuron,

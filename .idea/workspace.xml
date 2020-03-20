@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="convert tensorflow version on CDAE model">
+    <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/bprmf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/bprmf.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/cdae.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/cdae.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/item_ranking/neumf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/neumf.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -78,7 +79,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/test_item_ranking.py" />
-      <option name="PARAMETERS" value="--model=&quot;CDAE&quot;" />
+      <option name="PARAMETERS" value="--model=&quot;BPRMF&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -112,7 +113,7 @@
       <workItem from="1584364194784" duration="1000" />
       <workItem from="1584368854330" duration="6810000" />
       <workItem from="1584534192487" duration="6387000" />
-      <workItem from="1584622429664" duration="3796000" />
+      <workItem from="1584622429664" duration="6515000" />
     </task>
     <task id="LOCAL-00001" summary="convert tensorflow version into 2">
       <created>1581323248675</created>
@@ -135,7 +136,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584622487222</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="convert tensorflow version on ICDAE model">
+      <created>1584627318636</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1584627318636</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -158,9 +166,29 @@
     <MESSAGE value="convert tensorflow version into 2" />
     <MESSAGE value="fixed minor bug" />
     <MESSAGE value="convert tensorflow version on CDAE model" />
-    <option name="LAST_COMMIT_MESSAGE" value="convert tensorflow version on CDAE model" />
+    <MESSAGE value="convert tensorflow version on ICDAE model" />
+    <option name="LAST_COMMIT_MESSAGE" value="convert tensorflow version on ICDAE model" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/item_ranking/cdae.py</url>
+          <line>138</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/item_ranking/cdae.py</url>
+          <line>76</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/models/item_ranking/bprmf.py</url>
+          <line>76</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="self._get_corrupted_input(self.train_data[batch_set_idx, :], self.corruption_level)" language="Python" />
@@ -168,6 +196,6 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584627294058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584715196739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>
