@@ -79,7 +79,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/test_item_ranking.py" />
-      <option name="PARAMETERS" value="--model=&quot;BPRMF&quot;" />
+      <option name="PARAMETERS" value="--model=&quot;NeuMF&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -113,7 +113,10 @@
       <workItem from="1584364194784" duration="1000" />
       <workItem from="1584368854330" duration="6810000" />
       <workItem from="1584534192487" duration="6387000" />
-      <workItem from="1584622429664" duration="6515000" />
+      <workItem from="1584622429664" duration="8713000" />
+      <workItem from="1584964610265" duration="30000" />
+      <workItem from="1584964664970" duration="6849000" />
+      <workItem from="1585133553120" duration="3391000" />
     </task>
     <task id="LOCAL-00001" summary="convert tensorflow version into 2">
       <created>1581323248675</created>
@@ -143,7 +146,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584627318636</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Refactor BPRMF, CDAE model code">
+      <created>1584715375252</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1584715375252</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -167,28 +177,10 @@
     <MESSAGE value="fixed minor bug" />
     <MESSAGE value="convert tensorflow version on CDAE model" />
     <MESSAGE value="convert tensorflow version on ICDAE model" />
-    <option name="LAST_COMMIT_MESSAGE" value="convert tensorflow version on ICDAE model" />
+    <MESSAGE value="Refactor BPRMF, CDAE model code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor BPRMF, CDAE model code" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/item_ranking/cdae.py</url>
-          <line>138</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/item_ranking/cdae.py</url>
-          <line>76</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/models/item_ranking/bprmf.py</url>
-          <line>76</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="self._get_corrupted_input(self.train_data[batch_set_idx, :], self.corruption_level)" language="Python" />
@@ -196,6 +188,6 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1584715196739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/DeepRec$testSeqRec.coverage" NAME="testSeqRec Coverage Results" MODIFIED="1585137126316" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>
