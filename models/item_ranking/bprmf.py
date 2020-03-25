@@ -108,6 +108,7 @@ class BPRMF(object):
     def train_op(self, batch_user, batch_item, batch_item_neg):
         with tf.GradientTape() as tape:
             pred_y, pred_y_neg = self.model([batch_user, batch_item, batch_item_neg])
+            #TODO: use tf loss object
             loss = - tf.reduce_sum(
                 tf.math.log(tf.sigmoid(pred_y - pred_y_neg))) + \
                    self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q))

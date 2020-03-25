@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="ae4db37d-fd5d-4e6f-9a3e-9a06f06b55a5" name="Default Changelist" comment="convert tf version on NeuMF">
       <change beforePath="$PROJECT_DIR$/models/item_ranking/bprmf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/bprmf.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/item_ranking/cdae.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/cdae.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/item_ranking/neumf.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/item_ranking/neumf.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +114,7 @@
       <workItem from="1584622429664" duration="8713000" />
       <workItem from="1584964610265" duration="30000" />
       <workItem from="1584964664970" duration="6849000" />
-      <workItem from="1585133553120" duration="3391000" />
+      <workItem from="1585133553120" duration="3620000" />
     </task>
     <task id="LOCAL-00001" summary="convert tensorflow version into 2">
       <created>1581323248675</created>
@@ -153,7 +151,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584715375252</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Refactor BPRMF, CDAE model code">
+      <created>1585137353893</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1585137353893</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

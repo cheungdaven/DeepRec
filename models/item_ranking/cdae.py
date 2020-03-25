@@ -9,7 +9,7 @@ import time
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import Input, Model, regularizers
-from tensorflow.keras.layers import Dense, Add, Flatten, Reshape, Activation
+from tensorflow.keras.layers import Dense, Add, Flatten, Reshape, Activation, Embedding
 
 from utils.evaluation.RankingMetrics import evaluate
 
@@ -69,14 +69,17 @@ class CDAE(object):
         self.corruption_level = corruption_level
 
         corrupted_rating_matrix = Input(shape=(self.num_item,), dtype=tf.float32)
-        rating_matrix = Input(shape=(self.num_item,), dtype=tf.float32)
         user_id = Input(shape=(1,), dtype=tf.int32)
 
         _V = tf.Variable(tf.random.normal([self.num_user, hidden_neuron], stddev=0.01))
 
         squeezed_user_id = Flatten()(user_id)
-        user_latent_factor = EmbeddingLookup(_V)(squeezed_user_id)
-        user_latent_factor = Reshape((_V.shape[-1],))(user_latent_factor)
+        # user_latent_factor = EmbeddingLookup(_V)(squeezed_user_id)
+        # user_latent_factor = Reshape((_V.shape[-1],))(user_latent_factor)
+        user_latent_embedding = Embedding(input_dim=self.num_user, output_dim=hidden_neuron,
+                                       embeddings_initializer='normal', input_length=1)
+        user_latent_factor = Flatten()(user_latent_embedding(squeezed_user_id))
+
         z_vector = Dense(hidden_neuron,
                          kernel_regularizer=regularizers.l2(self.reg_rate),
                          bias_regularizer=regularizers.l2(self.reg_rate)
@@ -91,7 +94,7 @@ class CDAE(object):
                              )(z_vector)
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
-        self.model = Model(inputs=[corrupted_rating_matrix, rating_matrix, user_id],
+        self.model = Model(inputs=[corrupted_rating_matrix, user_id],
                            outputs=recon_vector)
 
     def prepare_data(self, train_data, test_data):
@@ -106,7 +109,7 @@ class CDAE(object):
     @tf.function
     def train_op(self, corrupted_rating_matrix, rating_matrix, user_id):
         with tf.GradientTape() as tape:
-            recon_vector = self.model([corrupted_rating_matrix, rating_matrix, user_id])
+            recon_vector = self.model([corrupted_rating_matrix, user_id])
             loss = self.loss_object(rating_matrix, recon_vector)
         gradient_of_model = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(gradient_of_model, self.model.trainable_variables))
