@@ -4,9 +4,12 @@ Reference: Wu, Yao, et al. "Collaborative denoising auto-encoders for top-n reco
 of the Ninth ACM International Conference on Web Search and Data Mining. ACM, 2016.
 """
 
-import tensorflow as tf
 import time
+
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras import Input, Model, regularizers
+from tensorflow.keras.layers import Dense, Add, Flatten, Reshape, Activation, Embedding
 
 from utils.evaluation.RankingMetrics import evaluate
 
@@ -19,11 +22,19 @@ __maintainer__ = "Shuai Zhang"
 __email__ = "cheungdaven@gmail.com"
 __status__ = "Development"
 
+# TODO: need to move this into tf2_utils
+class EmbeddingLookup(tf.keras.layers.Layer):
+    def __init__(self, input_embedding, **kwargs):
+        super(EmbeddingLookup, self).__init__(**kwargs)
+        self.input_embedding = input_embedding
+
+    def call(self, inputs):
+        return tf.nn.embedding_lookup(self.input_embedding, inputs)
+
 
 class CDAE(object):
-    def __init__(self, sess, num_user, num_item, learning_rate=0.01, reg_rate=0.01, epoch=500, batch_size=100,
+    def __init__(self, num_user, num_item, learning_rate=0.01, reg_rate=0.01, epoch=500, batch_size=100,
                  verbose=False, t=1, display_step=1000):
-        self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
         self.learning_rate = learning_rate
@@ -33,13 +44,14 @@ class CDAE(object):
         self.verbose = verbose
         self.T = t
         self.display_step = display_step
+        self.loss_estimator = tf.keras.metrics.Mean(name='train_loss')
+        self.loss_object = tf.keras.losses.BinaryCrossentropy()
 
         self.user_id = None
         self.corrupted_rating_matrix = None
         self.rating_matrix = None
         self.corruption_level = None
         self.layer_2 = None
-        self.loss = None
         self.optimizer = None
         self.train_data = None
         self.neg_items = None
@@ -48,31 +60,42 @@ class CDAE(object):
         self.test_data = None
         self.test_users = None
         self.reconstruction = None
+
+        self.optimizer = None
+        self.model = None
         print("You are running CDAE.")
 
     def build_network(self, hidden_neuron=500, corruption_level=0):
-        self.corrupted_rating_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_item])
-        self.rating_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_item])
-        self.user_id = tf.placeholder(dtype=tf.int32, shape=[None])
         self.corruption_level = corruption_level
 
-        _W = tf.Variable(tf.random_normal([self.num_item, hidden_neuron], stddev=0.01))
-        _W_prime = tf.Variable(tf.random_normal([hidden_neuron, self.num_item], stddev=0.01))
-        _V = tf.Variable(tf.random_normal([self.num_user, hidden_neuron], stddev=0.01))
+        corrupted_rating_matrix = Input(shape=(self.num_item,), dtype=tf.float32)
+        user_id = Input(shape=(1,), dtype=tf.int32)
 
-        b = tf.Variable(tf.random_normal([hidden_neuron], stddev=0.01))
-        b_prime = tf.Variable(tf.random_normal([self.num_item], stddev=0.01))
-        print(np.shape(tf.matmul(self.corrupted_rating_matrix, _W)))
-        print(np.shape(tf.nn.embedding_lookup(_V, self.user_id)))
-        layer_1 = tf.sigmoid(tf.matmul(self.corrupted_rating_matrix, _W) + tf.nn.embedding_lookup(_V, self.user_id) + b)
-        self.layer_2 = tf.sigmoid(tf.matmul(layer_1, _W_prime) + b_prime)
+        _V = tf.Variable(tf.random.normal([self.num_user, hidden_neuron], stddev=0.01))
 
-        self.loss = - tf.reduce_sum(
-            self.rating_matrix * tf.log(self.layer_2) + (1 - self.rating_matrix) * tf.log(1 - self.layer_2)) + \
-            self.reg_rate * (tf.nn.l2_loss(_W) + tf.nn.l2_loss(_W_prime) + tf.nn.l2_loss(_V) +
-                             tf.nn.l2_loss(b) + tf.nn.l2_loss(b_prime))
+        squeezed_user_id = Flatten()(user_id)
+        # user_latent_factor = EmbeddingLookup(_V)(squeezed_user_id)
+        # user_latent_factor = Reshape((_V.shape[-1],))(user_latent_factor)
+        user_latent_embedding = Embedding(input_dim=self.num_user, output_dim=hidden_neuron,
+                                       embeddings_initializer='normal', input_length=1)
+        user_latent_factor = Flatten()(user_latent_embedding(squeezed_user_id))
 
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+        z_vector = Dense(hidden_neuron,
+                         kernel_regularizer=regularizers.l2(self.reg_rate),
+                         bias_regularizer=regularizers.l2(self.reg_rate)
+                         )(corrupted_rating_matrix)
+
+        z_vector = Add()([z_vector, user_latent_factor])
+        z_vector = Activation(tf.nn.sigmoid)(z_vector)
+
+        recon_vector = Dense(self.num_item, activation='sigmoid',
+                             kernel_regularizer=regularizers.l2(self.reg_rate),
+                             bias_regularizer=regularizers.l2(self.reg_rate)
+                             )(z_vector)
+
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
+        self.model = Model(inputs=[corrupted_rating_matrix, user_id],
+                           outputs=recon_vector)
 
     def prepare_data(self, train_data, test_data):
         self.train_data = self._data_process(train_data)
@@ -82,6 +105,15 @@ class CDAE(object):
         self.test_data = test_data
         self.test_users = set([u for u in self.test_data.keys() if len(self.test_data[u]) > 0])
         print("data preparation finished.")
+
+    @tf.function
+    def train_op(self, corrupted_rating_matrix, rating_matrix, user_id):
+        with tf.GradientTape() as tape:
+            recon_vector = self.model([corrupted_rating_matrix, user_id])
+            loss = self.loss_object(rating_matrix, recon_vector)
+        gradient_of_model = tape.gradient(loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradient_of_model, self.model.trainable_variables))
+        self.loss_estimator(loss)
 
     def train(self):
         idxs = np.random.permutation(self.num_training)  # shuffled ordering
@@ -93,27 +125,25 @@ class CDAE(object):
             elif i < self.total_batch - 1:
                 batch_set_idx = idxs[i * self.batch_size: (i + 1) * self.batch_size]
 
-            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={
-                self.corrupted_rating_matrix: self._get_corrupted_input(self.train_data[batch_set_idx, :],
-                                                                        self.corruption_level),
-                self.rating_matrix: self.train_data[batch_set_idx, :],
-                self.user_id: batch_set_idx
-                })
+            expanded_batch_set_idx = np.expand_dims(np.array(batch_set_idx), -1)
+            self.train_op(
+                self._get_corrupted_input(self.train_data[batch_set_idx, :], self.corruption_level),
+                np.array(self.train_data[batch_set_idx, :], np.float32),
+                expanded_batch_set_idx)
+
             if self.verbose and i % self.display_step == 0:
-                print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
+                print("Index: %04d; cost= %.9f" % (i + 1, self.loss_estimator.result()))
                 if self.verbose:
                     print("one iteration: %s seconds." % (time.time() - start_time))
 
     def test(self):
-        self.reconstruction = self.sess.run(self.layer_2, feed_dict={self.corrupted_rating_matrix: self.train_data,
-                                                                     self.user_id: range(self.num_user)})
-
+        reconstruction = self.model([self.train_data, self.train_data, np.expand_dims(range(self.num_user), -1)])
+        self.reconstruction = np.array(reconstruction)
         evaluate(self)
 
     def execute(self, train_data, test_data):
         self.prepare_data(train_data, test_data)
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
+
         for epoch in range(self.epochs):
             self.train()
             if epoch % self.T == 0:
@@ -121,8 +151,7 @@ class CDAE(object):
                 self.test()
 
     def save(self, path):
-        saver = tf.train.Saver()
-        saver.save(self.sess, path)
+        tf.saved_model.save(self.model, path)
 
     def predict(self, user_id, item_id):
         return np.array(self.reconstruction[np.array(user_id), np.array(item_id)])
@@ -141,7 +170,7 @@ class CDAE(object):
 
     @staticmethod
     def _get_corrupted_input(input_train_data, corruption_level):
-        return np.random.binomial(n=1, p=1 - corruption_level) * input_train_data
+        return np.array(np.random.binomial(n=1, p=1 - corruption_level) * input_train_data)
 
 
 class ICDAE(object):
@@ -149,9 +178,9 @@ class ICDAE(object):
     Based on CDAE and I-AutoRec, I designed the following item based CDAE, it seems to perform better than CDAE
     slightly.
     """
-    def __init__(self, sess, num_user, num_item, learning_rate=0.01, reg_rate=0.01, epoch=500, batch_size=300,
+
+    def __init__(self, num_user, num_item, learning_rate=0.01, reg_rate=0.01, epoch=500, batch_size=300,
                  verbose=False, t=2, display_step=1000):
-        self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
         self.learning_rate = learning_rate
@@ -161,13 +190,13 @@ class ICDAE(object):
         self.verbose = verbose
         self.T = t
         self.display_step = display_step
+        self.loss_estimator = tf.keras.metrics.Mean(name='train_loss')
+        self.loss_object = tf.keras.losses.BinaryCrossentropy()
 
         self.corrupted_interact_matrix = None
         self.interact_matrix = None
-        self.item_id = None
         self.corruption_level = None
         self.layer_2 = None
-        self.loss = None
         self.optimizer = None
         self.train_data = None
         self.neg_items = None
@@ -176,31 +205,31 @@ class ICDAE(object):
         self.test_data = None
         self.test_users = None
         self.reconstruction = None
+
+        self.optimizer = None
+        self.model = None
         print("Item based CDAE.")
 
     def build_network(self, hidden_neuron=500, corruption_level=0):
-        self.corrupted_interact_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_user])
-        self.interact_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_user])
-        self.item_id = tf.placeholder(dtype=tf.int32, shape=[None])
+        # self.corrupted_interact_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_user])
+        # self.interact_matrix = tf.placeholder(dtype=tf.float32, shape=[None, self.num_user])
+        # self.item_id = tf.placeholder(dtype=tf.int32, shape=[None])
         self.corruption_level = corruption_level
+        corrupted_rating_matrix = Input(shape=(self.num_user,), dtype=tf.float32)
+        _V = tf.Variable(tf.random.normal([self.num_item, hidden_neuron], stddev=0.01))
 
-        _W = tf.Variable(tf.random_normal([self.num_user, hidden_neuron], stddev=0.01))
-        _W_prime = tf.Variable(tf.random_normal([hidden_neuron, self.num_user], stddev=0.01))
-        _V = tf.Variable(tf.random_normal([self.num_item, hidden_neuron], stddev=0.01))
+        z_vector = Dense(hidden_neuron,
+                         activation='sigmoid',
+                         kernel_regularizer=regularizers.l2(self.reg_rate),
+                         bias_regularizer=regularizers.l2(self.reg_rate))(corrupted_rating_matrix)
 
-        b = tf.Variable(tf.random_normal([hidden_neuron], stddev=0.01))
-        b_prime = tf.Variable(tf.random_normal([self.num_user], stddev=0.01))
-        # print(np.shape(tf.matmul(self.corrupted_interact_matrix, _W)))
-        # print(np.shape( tf.nn.embedding_lookup(_V, self.item_id)))
-        layer_1 = tf.sigmoid(tf.matmul(self.corrupted_interact_matrix, _W) + b)
-        self.layer_2 = tf.sigmoid(tf.matmul(layer_1, _W_prime) + b_prime)
+        recon_vector = Dense(self.num_user, activation='sigmoid',
+                             kernel_regularizer=regularizers.l2(self.reg_rate),
+                             bias_regularizer=regularizers.l2(self.reg_rate))(z_vector)
 
-        self.loss = - tf.reduce_sum(
-            self.interact_matrix * tf.log(self.layer_2) + (1 - self.interact_matrix) * tf.log(1 - self.layer_2)) + \
-            self.reg_rate * (tf.nn.l2_loss(_W) + tf.nn.l2_loss(_W_prime) +
-                             tf.nn.l2_loss(b) + tf.nn.l2_loss(b_prime))
-
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
+        self.model = Model(inputs=corrupted_rating_matrix,
+                           outputs=recon_vector)
 
     def prepare_data(self, train_data, test_data):
         self.train_data = self._data_process(train_data).transpose()
@@ -210,6 +239,15 @@ class ICDAE(object):
         self.test_data = test_data
         self.test_users = set([u for u in self.test_data.keys() if len(self.test_data[u]) > 0])
         print("data preparation finished.")
+
+    @tf.function
+    def train_op(self, corrupted_rating_matrix, rating_matrix):
+        with tf.GradientTape() as tape:
+            recon_vector = self.model([corrupted_rating_matrix])
+            loss = self.loss_object(rating_matrix, recon_vector)
+        gradient_of_model = tape.gradient(loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradient_of_model, self.model.trainable_variables))
+        self.loss_estimator(loss)
 
     def train(self):
         idxs = np.random.permutation(self.num_training)  # shuffled ordering
@@ -221,27 +259,24 @@ class ICDAE(object):
             elif i < self.total_batch - 1:
                 batch_set_idx = idxs[i * self.batch_size: (i + 1) * self.batch_size]
 
-            _, loss = self.sess.run([self.optimizer, self.loss], feed_dict={
-                self.corrupted_interact_matrix: self._get_corrupted_input(self.train_data[batch_set_idx, :],
-                                                                          self.corruption_level),
-                self.interact_matrix: self.train_data[batch_set_idx, :],
-                self.item_id: batch_set_idx
-                })
+            self.train_op(
+                self._get_corrupted_input(np.array(self.train_data[batch_set_idx, :], dtype=np.float32), self.corruption_level),
+                np.array(self.train_data[batch_set_idx, :], np.float32)
+                )
+
             if self.verbose and i % self.display_step == 0:
-                print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
+                print("Index: %04d; cost= %.9f" % (i + 1, self.loss_estimator.result()))
                 if self.verbose:
                     print("one iteration: %s seconds." % (time.time() - start_time))
 
     def test(self):
-        self.reconstruction = self.sess.run(self.layer_2, feed_dict={self.corrupted_interact_matrix: self.train_data,
-                                                                     self.item_id: range(self.num_item)}).transpose()
-
+        reconstruction = self.model([self.train_data, self.train_data])
+        self.reconstruction = np.array(reconstruction)
         evaluate(self)
 
     def execute(self, train_data, test_data):
         self.prepare_data(train_data, test_data)
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
+
         for epoch in range(self.epochs):
             self.train()
             if epoch % self.T == 0:
@@ -249,11 +284,10 @@ class ICDAE(object):
                 self.test()
 
     def save(self, path):
-        saver = tf.train.Saver()
-        saver.save(self.sess, path)
+        tf.saved_model.save(self.model, path)
 
     def predict(self, user_id, item_id):
-        return np.array(self.reconstruction[np.array(user_id), np.array(item_id)])
+        return np.array(self.reconstruction[np.array(item_id), np.array(user_id)])
 
     @staticmethod
     def _data_process(data):

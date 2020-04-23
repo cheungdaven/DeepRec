@@ -5,8 +5,9 @@ on World Wide Web. International World Wide Web Conferences Steering Committee, 
 """
 
 import tensorflow as tf
+from tensorflow.keras import Input, regularizers, Model
+from tensorflow.keras.layers import Flatten, Embedding, Multiply, concatenate, Dense, Lambda
 import time
-import numpy as np
 import random
 
 from utils.evaluation.RankingMetrics import *
@@ -22,9 +23,8 @@ __status__ = "Development"
 
 
 class NeuMF(object):
-    def __init__(self, sess, num_user, num_item, learning_rate=0.5, reg_rate=0.01, epoch=500, batch_size=256,
+    def __init__(self, num_user, num_item, learning_rate=0.5, reg_rate=0.01, epoch=500, batch_size=256,
                  verbose=False, t=1, display_step=1000):
-        self.sess = sess
         self.num_user = num_user
         self.num_item = num_item
         self.learning_rate = learning_rate
@@ -44,7 +44,8 @@ class NeuMF(object):
         self.mlp_P = None
         self.mlp_Q = None
         self.pred_y = None
-        self.loss = None
+        self.loss_estimator = tf.keras.metrics.Mean(name='train_loss')
+        self.loss_object = tf.keras.losses.BinaryCrossentropy()
         self.optimizer = None
 
         self.test_data = None
@@ -60,75 +61,59 @@ class NeuMF(object):
 
     def build_network(self, num_factor=10, num_factor_mlp=64, hidden_dimension=10, num_neg_sample=30):
         self.num_neg_sample = num_neg_sample
-        self.user_id = tf.placeholder(dtype=tf.int32, shape=[None], name='user_id')
-        self.item_id = tf.placeholder(dtype=tf.int32, shape=[None], name='item_id')
-        self.y = tf.placeholder(dtype=tf.float32, shape=[None], name='y')
+        user_id = Input(shape=(1,), dtype=tf.int32, name='user_id')
+        item_id = Input(shape=(1,), dtype=tf.int32, name='item_id')
 
-        self.P = tf.Variable(tf.random_normal([self.num_user, num_factor]), dtype=tf.float32)
-        self.Q = tf.Variable(tf.random_normal([self.num_item, num_factor]), dtype=tf.float32)
+        P = Embedding(input_dim=self.num_user, output_dim=num_factor, name='mf_embedding_user',
+                                      embeddings_initializer='normal', input_length=1)
+        Q = Embedding(input_dim=self.num_item, output_dim=num_factor, name='mf_embedding_item',
+                                      embeddings_initializer='normal', input_length=1)
 
-        self.mlp_P = tf.Variable(tf.random_normal([self.num_user, num_factor_mlp]), dtype=tf.float32)
-        self.mlp_Q = tf.Variable(tf.random_normal([self.num_item, num_factor_mlp]), dtype=tf.float32)
+        mlp_P = Embedding(input_dim=self.num_user, output_dim=num_factor_mlp, name="mlp_embedding_user",
+                                       embeddings_initializer='normal', input_length=1)
+        mlp_Q = Embedding(input_dim=self.num_item, output_dim=num_factor_mlp, name='mlp_embedding_item',
+                                       embeddings_initializer='normal', input_length=1)
 
-        user_latent_factor = tf.nn.embedding_lookup(self.P, self.user_id)
-        item_latent_factor = tf.nn.embedding_lookup(self.Q, self.item_id)
-        mlp_user_latent_factor = tf.nn.embedding_lookup(self.mlp_P, self.user_id)
-        mlp_item_latent_factor = tf.nn.embedding_lookup(self.mlp_Q, self.item_id)
+        flatten_user_id = Flatten()(user_id)
+        flatten_item_id = Flatten()(item_id)
 
-        _GMF = tf.multiply(user_latent_factor, item_latent_factor)
+        user_latent_factor = Flatten()(P(flatten_user_id))
+        item_latent_factor = Flatten()(Q(flatten_item_id))
 
-        layer_1 = tf.layers.dense(
-            inputs=tf.concat([mlp_item_latent_factor, mlp_user_latent_factor], axis=1),
-            units=num_factor_mlp * 2,
-            kernel_initializer=tf.random_normal_initializer,
-            activation=tf.nn.relu,
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        mlp_user_latent_factor = Flatten()(mlp_P(flatten_user_id))
+        mlp_item_latent_factor = Flatten()(mlp_Q(flatten_item_id))
 
-        layer_2 = tf.layers.dense(
-            inputs=layer_1,
-            units=hidden_dimension * 8,
-            activation=tf.nn.relu,
-            kernel_initializer=tf.random_normal_initializer,
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        _GMF = Multiply()([user_latent_factor, item_latent_factor])
 
-        layer_3 = tf.layers.dense(
-            inputs=layer_2,
-            units=hidden_dimension * 4,
-            activation=tf.nn.relu,
-            kernel_initializer=tf.random_normal_initializer,
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_1 = concatenate([mlp_item_latent_factor, mlp_user_latent_factor])
+        layer_1 = Dense(num_factor_mlp, activation='relu',
+                        kernel_regularizer=regularizers.l2(self.reg_rate)
+                        )(layer_1)
 
-        layer_4 = tf.layers.dense(
-            inputs=layer_3,
-            units=hidden_dimension * 2,
-            activation=tf.nn.relu,
-            kernel_initializer=tf.random_normal_initializer,
-            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_2 = Dense(hidden_dimension * 8, activation='relu',
+                        kernel_regularizer=regularizers.l2(self.reg_rate)
+                        )(layer_1)
 
-        _MLP = tf.layers.dense(
-                inputs=layer_4,
-                units=hidden_dimension,
-                activation=tf.nn.relu,
-                kernel_initializer=tf.random_normal_initializer,
-                kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        layer_3 = Dense(hidden_dimension * 4,
+                        activation='relu',
+                        kernel_regularizer=regularizers.l2(self.reg_rate)
+                        )(layer_2)
 
-        self.pred_y = tf.nn.sigmoid(tf.reduce_sum(tf.concat([_GMF, _MLP], axis=1), 1))
+        layer_4 = Dense(hidden_dimension * 2,
+                        activation='relu',
+                        kernel_regularizer=regularizers.l2(self.reg_rate)
+                        )(layer_3)
 
-        # self.pred_y = tf.layers.dense(
-        #     inputs=tf.concat([_GMF, _MLP], axis=1), units=1, activation=tf.sigmoid,
-        #     kernel_initializer=tf.random_normal_initializer,
-        #     kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=self.reg_rate))
+        _MLP = Dense(hidden_dimension,
+                     activation='relu',
+                     kernel_regularizer=regularizers.l2(self.reg_rate)
+                     )(layer_4)
 
-        # -{y.log(p{y=1}) + (1-y).log(1 - p{y=1})} + {regularization loss...}
-        self.loss = - tf.reduce_sum(
-            self.y * tf.log(self.pred_y + 1e-10) + (1 - self.y) * tf.log(1 - self.pred_y + 1e-10)) + \
-            tf.losses.get_regularization_loss() + \
-            self.reg_rate * (tf.nn.l2_loss(self.P) + tf.nn.l2_loss(self.Q) +
-                             tf.nn.l2_loss(self.mlp_P) + tf.nn.l2_loss(self.mlp_Q))
+        pred_y = Dense(1, activation='sigmoid')(concatenate([_GMF, _MLP]))
+        self.model = Model(inputs=[user_id, item_id],
+                            outputs=pred_y)
 
-        self.optimizer = tf.train.AdagradOptimizer(self.learning_rate).minimize(self.loss)
-
-        return self
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
 
     def prepare_data(self, train_data, test_data):
         """
@@ -149,6 +134,15 @@ class NeuMF(object):
 
         print("data preparation finished.")
         return self
+
+    @tf.function
+    def train_op(self, batch_user, batch_item, batch_label):
+        with tf.GradientTape() as tape:
+            pred_y = self.model([batch_user, batch_item])
+            loss = self.loss_object(batch_label, pred_y)
+        gradient_of_model = tape.gradient(loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradient_of_model, self.model.trainable_variables))
+        self.loss_estimator(loss)
 
     def train(self):
         item_temp = self.item[:]
@@ -172,9 +166,9 @@ class NeuMF(object):
         self.total_batch = int(self.num_training / self.batch_size)
         # print(self.total_batch)
         idxs = np.random.permutation(self.num_training)  # shuffled ordering
-        user_random = list(np.array(user_temp)[idxs])
-        item_random = list(np.array(item_temp)[idxs])
-        labels_random = list(np.array(labels_temp)[idxs])
+        user_random = np.array(user_temp)[idxs]
+        item_random = np.array(item_temp)[idxs]
+        labels_random = np.array(labels_temp)[idxs]
 
         # train
         for i in range(self.total_batch):
@@ -183,12 +177,15 @@ class NeuMF(object):
             batch_item = item_random[i * self.batch_size:(i + 1) * self.batch_size]
             batch_label = labels_random[i * self.batch_size:(i + 1) * self.batch_size]
 
-            _, loss = self.sess.run((self.optimizer, self.loss),
-                                    feed_dict={self.user_id: batch_user, self.item_id: batch_item, self.y: batch_label})
+            batch_user = np.expand_dims(batch_user, -1)
+            batch_item = np.expand_dims(batch_item, -1)
+            batch_label = np.expand_dims(batch_label, -1)
+
+            self.train_op(batch_user, batch_item, batch_label)
 
             if i % self.display_step == 0:
                 if self.verbose:
-                    print("Index: %04d; cost= %.9f" % (i + 1, np.mean(loss)))
+                    print("Index: %04d; cost= %.9f" % (i + 1, self.loss_estimator.result()))
                     print("one iteration: %s seconds." % (time.time() - start_time))
 
     def test(self):
@@ -197,9 +194,6 @@ class NeuMF(object):
     def execute(self, train_data, test_data):
         self.prepare_data(train_data, test_data)
 
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
-
         for epoch in range(self.epochs):
             self.train()
             if epoch % self.T == 0:
@@ -207,11 +201,12 @@ class NeuMF(object):
                 self.test()
 
     def save(self, path):
-        saver = tf.train.Saver()
-        saver.save(self.sess, path)
+        tf.saved_model.save(self.model, path)
 
     def predict(self, user_id, item_id):
-        return self.sess.run([self.pred_y], feed_dict={self.user_id: user_id, self.item_id: item_id})[0]
+        user_id = np.expand_dims(np.array(user_id), -1)
+        item_id = np.expand_dims(np.array(item_id), -1)
+        return np.array(self.model([user_id, item_id]))
 
     def _get_neg_items(self, data):
         all_items = set(np.arange(self.num_item))
