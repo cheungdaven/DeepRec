@@ -36,13 +36,17 @@ To use the code, run: Test/test_item_ranking.py, Test/test_rating_pred.py, or Te
 To acknowledge use of this open source package in publications, please cite either of the following papers:
 
 ```
-@article{zhang2019deeprecsyscsur,
-  title={Deep learning based recommender system: A survey and new perspectives},
-  author={Zhang, Shuai and Yao, Lina and Sun, Aixin and Tay, Yi},
-  journal={ACM Computing Surveys (CSUR)},
-  volume={52},
-  year={2019},
-  publisher={ACM}
+@Inbook{Zhang2022,
+    author="Zhang, Shuai and Tay, Yi and Yao, Lina and Sun, Aixin and Zhang, Ce",
+    editor="Ricci, Francesco and Rokach, Lior and Shapira, Bracha",
+    title="Deep Learning for Recommender Systems",
+    bookTitle="Recommender Systems Handbook",
+    year="2022",
+    publisher="Springer US",
+    address="New York, NY",
+    pages="173--210",
+    doi="10.1007/978-1-0716-2197-4_5",
+    url="https://doi.org/10.1007/978-1-0716-2197-4_5"
 }
 ```
 or 
@@ -56,17 +60,13 @@ or
 ```
 or 
 ```
-@Inbook{Zhang2022,
-author="Zhang, Shuai and Tay, Yi and Yao, Lina and Sun, Aixin and Zhang, Ce",
-editor="Ricci, Francesco and Rokach, Lior and Shapira, Bracha",
-title="Deep Learning for Recommender Systems",
-bookTitle="Recommender Systems Handbook",
-year="2022",
-publisher="Springer US",
-address="New York, NY",
-pages="173--210",
-doi="10.1007/978-1-0716-2197-4_5",
-url="https://doi.org/10.1007/978-1-0716-2197-4_5"
+@article{zhang2019deeprecsyscsur,
+  title={Deep learning based recommender system: A survey and new perspectives},
+  author={Zhang, Shuai and Yao, Lina and Sun, Aixin and Tay, Yi},
+  journal={ACM Computing Surveys (CSUR)},
+  volume={52},
+  year={2019},
+  publisher={ACM}
 }
 ```
 Thank you for your support!
