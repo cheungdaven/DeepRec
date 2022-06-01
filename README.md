@@ -54,6 +54,21 @@ or
    year={2019}
  }
 ```
+or 
+```
+@Inbook{Zhang2022,
+author="Zhang, Shuai and Tay, Yi and Yao, Lina and Sun, Aixin and Zhang, Ce",
+editor="Ricci, Francesco and Rokach, Lior and Shapira, Bracha",
+title="Deep Learning for Recommender Systems",
+bookTitle="Recommender Systems Handbook",
+year="2022",
+publisher="Springer US",
+address="New York, NY",
+pages="173--210",
+doi="10.1007/978-1-0716-2197-4_5",
+url="https://doi.org/10.1007/978-1-0716-2197-4_5"
+}
+```
 Thank you for your support!
 
 The chinese version is host [here](https://code.ihub.org.cn/projects/274).
